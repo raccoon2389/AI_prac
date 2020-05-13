@@ -11,7 +11,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 model = Sequential()
 
-model.add(Dense(100, input_dim =1))
+model.add(Dense(1000, input_dim =1))
 model.add(Dense(40))
 model.add(Dense(1000))
 model.add(Dense(40))
@@ -43,7 +43,7 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제�
                                                                 # 회귀 = 1.54 , 10.01 같이 연속적인 값 
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
-model.fit(x_train,y_train, epochs=30, batch_size=1)
+model.fit(x_train,y_train, epochs=300, batch_size=1)
 
 #4. evaluate,predict
 loss, mse = model.evaluate(x_test,y_test,batch_size=1)

@@ -14,6 +14,13 @@ model = Sequential()
 model.add(Dense(100, input_dim =1))
 model.add(Dense(40))
 model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
+model.add(Dense(1000))
 model.add(Dense(40))
 
 

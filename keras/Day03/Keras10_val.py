@@ -15,9 +15,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 model = Sequential()
 
-model.add(Dense(500, input_dim =1))
-model.add(Dense(50))
-model.add(Dense(5))
+model.add(Dense(50, input_dim =1))
+model.add(Dense(20))
+model.add(Dense(30))
 model.add(Dense(1))
 
 #3. 훈련

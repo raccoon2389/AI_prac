@@ -18,7 +18,7 @@ model.compile(loss='mse', optimizer='adam', metrics=['accuracy']) #mse=mean_squa
 model.summary()
 
 model.fit(x_train,y_train,epochs=100,batch_size=2,validation_data=(x_test,y_test)) #batch_size defualt = 32 epoch=반복횟수 
-                                                                                #validation_data = over-fitting을 피하기 위해 train과 test 외에 set를 준비해야하지만 여기서는 test로 대체 
+                                                                                #validation_data = over-fitting을 피하기 위해 train set중 일부를 따로 빼서 준비해야하지만 여기서는 test로 대체 
 loss,acc = model.evaluate(x_test,y_test,batch_size=1)
 print("loss : ", loss)
 print("acc = ",acc)

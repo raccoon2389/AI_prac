@@ -1,7 +1,7 @@
 #1. 데이터
 import numpy as np
 x=np.arange(1,101)
-y=np.arange(101,201)
+y=np.arange(102,301,2)#y=2w+100
 
 from sklearn.model_selection import train_test_split
 
@@ -51,7 +51,7 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제�
                                                                 # 회귀 = 1.54 , 10.01 같이 연속적인 값 
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
-model.fit(x_train,y_train, epochs=125, batch_size=1, validation_split=0.25) # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
+model.fit(x_train,y_train, epochs=110, batch_size=1, validation_split=0.25) # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음

@@ -1,7 +1,7 @@
 #1. 데이터
 import numpy as np
-x=np.arange(range(1,101),range(311,411),range(100))
-y=np.arange(range(101,201,range(411,511),range(100,200)))#y=2w+100
+x=np.array([range(1,101),range(311,411),range(100)]) #열우선 행무시 x=np.array([range(1,101),range(311,411),range(100)]) 이렇게 쓰면 (3,100)이되어서 가로로 바꿔야함
+y=np.array([range(101,201),range(411,511),range(100)])
 
 from sklearn.model_selection import train_test_split
 
@@ -9,6 +9,27 @@ from sklearn.model_selection import train_test_split
 # split을하여 데이터를 나누어준다
 # randomstate가 같게되면 같은 난수표를 사용하여서 shuffle을 안해주면 동일한 결과가 나온다
 #  
+
+
+# (3,100) 배열을 (100,3)으로 변환
+# scipy의 rotate함수를 이용하여 변환하는 방법
+from scipy.ndimage.interpolation import rotate
+
+
+x = rotate(x, angle = -90)
+y = rotate(y, angle = -90)
+print(x.shape, y.shape)
+'''
+###### for loop를 이용한 자작 변환 함수 (2d matrics -90도 회전만 가능)
+shape = x.shape
+print(shape)
+x2 = np.zeros((shape[1],shape[0]))
+
+for r in range(100):
+    for c in range(3):
+        x2[r,c] = x[c,r] 
+#####
+
 x_train, x_test, y_train, y_test = train_test_split(
     x,y,
     random_state=66,
@@ -38,10 +59,10 @@ from keras.models import Sequential
 from keras.layers import Dense
 model = Sequential()
 
-model.add(Dense(10, input_dim =1))
+model.add(Dense(10, input_dim =3))
 model.add(Dense(10))
 model.add(Dense(5))
-model.add(Dense(1))
+model.add(Dense(3))
 
 #3. 훈련
 model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제곱에러 (실제 데이터값 - 예측값)의 제곱 을 평균으로 나눈다. 
@@ -83,3 +104,5 @@ print("RMSE : ",RMSE(y_test,y_predict))
 from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("R2 : ", r2)
+
+'''

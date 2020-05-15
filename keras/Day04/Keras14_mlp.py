@@ -1,4 +1,5 @@
-#1. 데이터
+# 1. 데이터 
+
 import numpy as np
 x=np.array([range(1,101),range(311,411),range(100)]) #열우선 행무시 x=np.array([range(1,101),range(311,411),range(100)]) 이렇게 쓰면 (3,100)이되어서 가로로 바꿔야함
 y=np.array([range(101,201),range(411,511),range(100)])
@@ -19,16 +20,16 @@ from scipy.ndimage.interpolation import rotate
 x = rotate(x, angle = -90)
 y = rotate(y, angle = -90)
 print(x.shape, y.shape)
-'''
-###### for loop를 이용한 자작 변환 함수 (2d matrics -90도 회전만 가능)
-shape = x.shape
-print(shape)
-x2 = np.zeros((shape[1],shape[0]))
 
-for r in range(100):
-    for c in range(3):
-        x2[r,c] = x[c,r] 
-#####
+# ###### for loop를 이용한 자작 변환 함수 (2d matrics -90도 회전만 가능)
+# shape = x.shape
+# print(shape)
+# x2 = np.zeros((shape[1],shape[0]))
+
+# for r in range(100):
+#     for c in range(3):
+#         x2[r,c] = x[c,r] 
+# #####
 
 x_train, x_test, y_train, y_test = train_test_split(
     x,y,
@@ -59,12 +60,13 @@ from keras.models import Sequential
 from keras.layers import Dense
 model = Sequential()
 
-model.add(Dense(10, input_dim =3))
-model.add(Dense(10))
-model.add(Dense(5))
+model.add(Dense(2000, input_dim =3))
+model.add(Dense(100))
+model.add(Dense(100))
+model.add(Dense(50))
 model.add(Dense(3))
 
-#3. 훈련
+# 3. 훈련
 model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제곱에러 (실제 데이터값 - 예측값)의 제곱 을 평균으로 나눈다. 
                                                                 # 0.001의 오차만 나오더라도 mse 값이 매우 낮아짐 
                                                                 # acc는 분류지표 mse는 회귀지표
@@ -72,7 +74,7 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제�
                                                                 # 회귀 = 1.54 , 10.01 같이 연속적인 값 
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
-model.fit(x_train,y_train, epochs=110, batch_size=1, validation_split=0.25) # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
+model.fit(x_train,y_train, epochs=510, batch_size=1, validation_split=0.25) # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음
@@ -80,7 +82,7 @@ model.fit(x_train,y_train, epochs=110, batch_size=1, validation_split=0.25) # ep
                                                                                     # validation test set과 다르다
                                                                                     # validation_split 인수를 이용해 자체적으로 가능하다 
 
-#4. evaluate,predict
+# 4. evaluate,predict
 loss, mse = model.evaluate(x_test,y_test,batch_size=1)
 print("loss : ",loss,"\nmse : ",mse)
 
@@ -104,5 +106,3 @@ print("RMSE : ",RMSE(y_test,y_predict))
 from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("R2 : ", r2)
-
-'''

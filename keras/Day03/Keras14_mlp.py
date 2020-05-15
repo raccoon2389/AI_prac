@@ -1,7 +1,7 @@
 #1. 데이터
 import numpy as np
-x=np.arange(1,101)
-y=np.arange(102,301,2)#y=2w+100
+x=np.arange(range(1,101),range(311,411),range(100))
+y=np.arange(range(101,201,range(411,511),range(100,200)))#y=2w+100
 
 from sklearn.model_selection import train_test_split
 

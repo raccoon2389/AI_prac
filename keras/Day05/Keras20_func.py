@@ -1,8 +1,6 @@
-# 실습 R2 0.5 이하
-# layers는 5개 이상
-# 노드의 갯수 10개 이상
-# batch_size 8 이하
-# epochs는 30 이상
+#1. sequencial -> model = sequencial
+#2. 함수형 -> 다수의 모델을 연계
+
 
 # 1. 데이터
 
@@ -20,19 +18,18 @@ from sklearn.model_selection import train_test_split
 
 
 # (3,100) 배열을 (100,3)으로 변환
+
 # transpose 이용
-x=x.transpose()
-y=y.transpose()
-
-
+# x=x.transpose()
+# y=y.transpose()
 
 # scipy의 rotate함수를 이용하여 변환하는 방법
-# from scipy.ndimage.interpolation import rotate
+from scipy.ndimage.interpolation import rotate
 
 
-# x=rotate(x, angle=-90)
-# y = rotate(y, angle = 90)
-# print(x.shape, y.shape)
+x=rotate(x, angle=-90)
+y = rotate(y, angle = -90)
+print(x.shape, y.shape)
 
 # ###### for loop를 이용한 자작 변환 함수 (2d matrics -90도 회전만 가능)
 # shape = x.shape
@@ -43,7 +40,6 @@ y=y.transpose()
 #     for c in range(3):
 #         x2[r,c] = x[c,r]
 # #####
-
 
 x_train, x_test, y_train, y_test=train_test_split(
     x, y,
@@ -70,20 +66,28 @@ x_train, x_test, y_train, y_test=train_test_split(
 # y_test = x[80:]
 
 # 2. model 구성
-from keras.models import Sequential
-from keras.layers import Dense
-model=Sequential()
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input
+#선형모델
+# model=Sequential()
 
-model.add(Dense(3000, input_dim=3))
-model.add(Dense(14000))
-model.add(Dense(6000))
-model.add(Dense(6000))
-model.add(Dense(5600))
-model.add(Dense(5600))
-model.add(Dense(500))
+# model.add(Dense(5, input_dim=3))
+# model.add(Dense(4))
+# model.add(Dense(1))
 
-model.add(Dense(1))
+#함수 모델
 
+input1 = Input(shape=(3,))
+
+dense1 = Dense(50,activation='relu')(input1)
+dense2 = Dense(4,activation='relu')(input1)
+dense3 = Dense(4,activation='relu')(input1)
+dense4 = Dense(4,activation='relu')(input1)
+dense5 = Dense(4,activation='relu')(input1)
+output1 = Dense(1)(dense1)
+
+model = Model(inputs=input1,outputs=output1)
+model.summary()
 # 3. 훈련
 # mse 평균제곱에러 (실제 데이터값 - 예측값)의 제곱 을 평균으로 나눈다.
 model.compile(loss='mse', optimizer='adam', metrics=['mse'])
@@ -94,7 +98,7 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
 # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다.
-model.fit(x_train, y_train, epochs=30, batch_size=8, validation_split=0.25)
+model.fit(x_train, y_train, epochs=100, batch_size=1, validation_split=0.25, verbose=1) # verbose = 0: 아무것도 안보임 1: 기본값 2: 프로그레스바 삭제 3: epoch만
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음
@@ -103,11 +107,11 @@ model.fit(x_train, y_train, epochs=30, batch_size=8, validation_split=0.25)
                                                                                     # validation_split 인수를 이용해 자체적으로 가능하다
 
 # 4. evaluate,predict
-loss, mse=model.evaluate(x_test, y_test, batch_size=8)
+loss, mse=model.evaluate(x_test, y_test, batch_size=1)
 print("loss : ", loss, "\nmse : ", mse)
 
 y_predict=model.predict(x_test)
-print(y_test,y_predict)
+print(x_test,y_predict)
 
 from sklearn.metrics import mean_squared_error
 # RMSE 구하기

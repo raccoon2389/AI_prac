@@ -1,16 +1,10 @@
-#1. sequencial -> model = sequencial
-#2. 함수형 -> 다수의 모델을 연계
-
-
 # 1. 데이터
 
 import numpy as np
 # 열우선 행무시 x=np.array([range(1,101),range(311,411),range(100)]) 이렇게 쓰면 (3,100)이되어서 가로로 바꿔야함
-x1 = np.array([range(1, 101), range(311, 411), range(100)])
+x = np.array([range(1, 101), range(311, 411), range(100)])
+y = np.array([range(711, 811)])
 
-x2 = np.array([range(711, 811),range(711, 811),range(511, 611)])
-
-y1 = np.array([range(101, 201),range(411, 511),range(100)])
 from sklearn.model_selection import train_test_split
 
 # train_split #
@@ -19,12 +13,9 @@ from sklearn.model_selection import train_test_split
 #
 
 
+x = np.transpose(x)
+y = np.transpose(y)
 # (3,100) 배열을 (100,3)으로 변환
-
-# transpose 이용
-x1=np.transpose(x1)
-x2=np.transpose(x2)
-y1=np.transpose(y1)
 # scipy의 rotate함수를 이용하여 변환하는 방법
 # from scipy.ndimage.interpolation import rotate
 
@@ -43,8 +34,8 @@ y1=np.transpose(y1)
 #         x2[r,c] = x[c,r]
 # #####
 
-x1_train, x1_test, y1_train, y1_test, x2_train, x2_test =train_test_split(
-    x1, y1, x2,
+x_train, x_test, y_train, y_test=train_test_split(
+    x, y,
     random_state=66,
     test_size=0.2,
     shuffle=True)
@@ -70,42 +61,22 @@ x1_train, x1_test, y1_train, y1_test, x2_train, x2_test =train_test_split(
 # 2. model 구성
 from keras.models import Sequential, Model
 from keras.layers import Dense, Input
-#선형모델
-# model=Sequential()
-
-# model.add(Dense(5, input_dim=3))
-# model.add(Dense(4))
-# model.add(Dense(1))
-
-#함수 모델
 
 input1 = Input(shape=(3,))
+dense1 = Dense(100,activation='relu')(input1)
+dense2 = Dense(70,activation='relu')(dense1)
+dense3 = Dense(60,activation='relu')(dense2)
+dense3 = Dense(50,activation='relu')(dense3)
 
-dense1_1 = Dense(50,activation='relu', name='bitking1')(input1)
-dense1_2 = Dense(40,activation='relu', name='bitking2')(input1)
-dense1_3 = Dense(20,activation='relu', name='bitking3')(input1)
 
-input2 = Input(shape=(3,))
+output1 = Dense(40,activation='relu')(dense3)
+output1 = Dense(40,activation='relu')(output1)
+output1 = Dense(30,activation='relu')(output1)
+output1 = Dense(10,activation='relu')(output1)
+output3 = Dense(1)(output1)
 
-dense2_1 = Dense(50,activation='relu', name='bitking4')(input1)
-dense2_2 = Dense(40,activation='relu', name='bitking5')(input1)
-dense2_3 = Dense(4,activation='relu', name='bitking6')(input1)
-
-from keras.layers.merge import concatenate
-merge1 = concatenate([dense1_3,dense2_3] )
-
-middle1 = Dense(30)(merge1)
-middle2 = Dense(20)(middle1)
-middle3 = Dense(7)(middle2)
-
-############# output model ##############
-output1 =  Dense(30)(middle3)
-output1_2 = Dense(20)(output1)
-output1_3 = Dense(3)(output1_2)
-
-model = Model(inputs=[input1,input2] ,outputs=[output1_3])
+model = Model(inputs=[input1], outputs=[output3])
 model.summary()
-
 
 # 3. 훈련
 # mse 평균제곱에러 (실제 데이터값 - 예측값)의 제곱 을 평균으로 나눈다.
@@ -117,7 +88,9 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
 # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다.
-model.fit([x1_train, x2_train], [y1_train], epochs=50, batch_size=1, verbose=1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ) # verbose = 0: 아무것도 안보임 1: 기본값 2: 프로그레스바 삭제 3: epoch만
+from keras.callbacks import EarlyStopping
+earlystop = EarlyStopping(monitor='mse',patience= 5, mode='auto')
+model.fit(x_train, y_train, epochs=510, batch_size=1, validation_split=0.25,callbacks=[earlystop])
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음
@@ -126,20 +99,18 @@ model.fit([x1_train, x2_train], [y1_train], epochs=50, batch_size=1, verbose=1  
                                                                                     # validation_split 인수를 이용해 자체적으로 가능하다
 
 # 4. evaluate,predict
-loss, mse = model.evaluate([x1_test,x2_test], [y1_test], batch_size=1)
+loss, mse=model.evaluate(x_test, y_test, batch_size=1)
 print("loss : ", loss, "\nmse : ", mse)
 
-y_predict = model.predict([x1_test,x2_test])
-print(x1_test)
-###통합하는 방법##
-# y_predict = np.append(y_predict[0],y_predict[1])
-# y_test = np.append(y1_test,y2_test)
+y_predict=model.predict(x_test)
+print(y_test,y_predict)
 
 from sklearn.metrics import mean_squared_error
 # RMSE 구하기
 def RMSE(y_test, y_predict):  # rmse = mse를 root 취한값 크기에 의존적인게 단점이다. mse값이 1이하로 작아졌을때 크기가 커지고 1이상일때 크기가 작아진다. 1이하일때 보기 더 편해짐
-    return np.sqrt(mean_squared_error(y_test, y_predict)) 
-print("RMSE : ",RMSE(y1_test, y_predict) )
+    return np.sqrt(mean_squared_error(y_test, y_predict))
+
+print("RMSE : ", RMSE(y_test, y_predict))
 
 
 # R2만들기
@@ -149,5 +120,5 @@ print("RMSE : ",RMSE(y1_test, y_predict) )
     # 모델 그래프와 평균값 사이의 차를 편차(regression)라고 한다.
     # R2 = 1 - 편차^2/편차^2 이므로 오차가 편차보다 더 커지게 되면 음수가 나온다
 from sklearn.metrics import r2_score
-r2=r2_score(y1_test, y_predict)
+r2=r2_score(y_test, y_predict)
 print("R2 : ", r2)

@@ -81,22 +81,22 @@ from keras.layers import Dense, Input
 
 input1 = Input(shape=(3,))
 
-dense1_1 = Dense(50,activation='relu', name='bitking1')(input1)
-dense1_2 = Dense(40,activation='relu', name='bitking2')(input1)
-dense1_3 = Dense(20,activation='relu', name='bitking3')(input1)
+dense1_1 = Dense(40,activation='relu', name='bitking1')(input1)
+dense1_2 = Dense(30,activation='relu', name='bitking2')(input1)
+dense1_3 = Dense(4,activation='relu', name='bitking3')(input1)
 
 input2 = Input(shape=(3,))
 
-dense2_1 = Dense(50,activation='relu', name='bitking4')(input1)
-dense2_2 = Dense(40,activation='relu', name='bitking5')(input1)
+dense2_1 = Dense(40,activation='relu', name='bitking4')(input1)
+dense2_2 = Dense(20,activation='relu', name='bitking5')(input1)
 dense2_3 = Dense(4,activation='relu', name='bitking6')(input1)
 
 from keras.layers.merge import concatenate
 merge1 = concatenate([dense1_3,dense2_3] )
 
-middle1 = Dense(30)(merge1)
-middle2 = Dense(20)(middle1)
-middle3 = Dense(7)(middle2)
+middle1 = Dense(10)(merge1)
+middle2 = Dense(10)(middle1)
+middle3 = Dense(4)(middle2)
 
 ############# output model ##############
 output1 =  Dense(30)(middle3)
@@ -117,7 +117,9 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
 # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다.
-model.fit([x1_train, x2_train], [y1_train], epochs=50, batch_size=1, verbose=1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ) # verbose = 0: 아무것도 안보임 1: 기본값 2: 프로그레스바 삭제 3: epoch만
+from keras.callbacks import EarlyStopping
+earlystop = EarlyStopping(monitor='loss', patience=5, mode='auto')
+model.fit([x1_train, x2_train], [y1_train], epochs=500, batch_size=1, verbose=1, callbacks=[earlystop]) # verbose = 0: 아무것도 안보임 1: 기본값 2: 프로그레스바 삭제 3: epoch만
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음

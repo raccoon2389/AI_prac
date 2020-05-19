@@ -61,15 +61,25 @@ x_train, x_test, y_train, y_test = train_test_split(
 # y_test = x[80:]
 
 #2. model 구성
-from keras.models import Sequential
-from keras.layers import Dense
-model = Sequential()
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input
 
-model.add(Dense(2000, input_dim =1))
-model.add(Dense(100))
-model.add(Dense(100))
-model.add(Dense(50))
-model.add(Dense(3))
+input1 = Input(shape=(1,))
+dense1 = Dense(1000,activation='relu')(input1)
+dense2 = Dense(70,activation='relu')(dense1)
+dense3 = Dense(60,activation='relu')(dense2)
+dense3 = Dense(50,activation='relu')(dense3)
+
+
+output1 = Dense(400,activation='relu')(dense3)
+output1 = Dense(100,activation='relu')(output1)
+output1 = Dense(300,activation='relu')(output1)
+output1 = Dense(100,activation='relu')(output1)
+output3 = Dense(3)(output1)
+
+model = Model(inputs=[input1], outputs=[output3])
+model.summary()
+
 
 # 3. 훈련
 model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제곱에러 (실제 데이터값 - 예측값)의 제곱 을 평균으로 나눈다. 
@@ -79,7 +89,9 @@ model.compile(loss='mse', optimizer='adam', metrics=['mse'])    # mse 평균제�
                                                                 # 회귀 = 1.54 , 10.01 같이 연속적인 값 
                                                                 # metrics는 loss처럼 훈련에 영향은 주지 않고 계산한 값만 뱉어냄
 
-model.fit(x_train,y_train, epochs=510, batch_size=1, validation_split=0.25) # epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
+from keras.callbacks import EarlyStopping
+earlystop = EarlyStopping(monitor='mse',patience= 5, mode='auto')
+model.fit(x_train, y_train, epochs=510, batch_size=1, validation_split=0.25,callbacks=[earlystop])# epoch = 훈련 횟수 ; 일정수 이상의 훈련을 반복하면 과적합(over-fitting)이 일어나게 된다. 
                                                                                     # validation set = train set 중 일부를 떼와서 train으로 훈련후 검증한다
                                                                                     # fit하는 과정에 반영이 된다. W 값 최적화에 도움이 됨
                                                                                     # test는 최종 확인만 하므로 fit 과정에 영향을 주지 않음

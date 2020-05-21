@@ -20,39 +20,47 @@ from keras.layers import Dense,LSTM
 from keras.callbacks import EarlyStopping
 
 #1. 데이터
-x = np.arange(20)
+x = np.array([[1,2,3],[2,3,4],[3,4,5],[4,5,6]])
 y = np.array([4,5,6,7])
 
 print("shape of x : ", x.shape)
 
 
-x = x.reshape(1,5,4)
+x = x.reshape(x.shape[0],x.shape[1],1)
 print("shape of x : ", x.shape)
+'''
+                행          열      몇개씩 자르는지
+x의 shape = (batch_size, timesteps, feature)
 
+input_shape = (timesteps, feature)
+input_length = timesteps, input_dim = feature
 
+'''
 #2 모델 구성f
 model = Sequential()
-model.add(LSTM(10,activation='tanh',input_shape=(4,1)))
+
+# model.add(LSTM(10,input_shape=(3,1)))
+model.add(LSTM(10,input_length=3, input_dim=1))
+
 model.add(Dense(30))
 model.add(Dense(10))
 model.add(Dense(5))
 model.add(Dense(3))
-model.add(Dense(2))
+model.add(Dense(1))
 
 model.summary() # LSTM 파라미터 폭증 이유 알아오기
-'''
+
 # 실행
 model.compile(optimizer='adam', loss='mse')
 
 e_stop = EarlyStopping(monitor='loss',mode='auto',patience=50)
 model.fit(x,y,epochs=10000,callbacks=[e_stop])
 
-x_input = np.array([5,6,7])
-x_input = x_input.reshape(1,3,1)
+x_predict = np.array([5,6,7])
+x_predict = x_predict.reshape(1,3,1)
 
-print(x_input)
+print(x_predict)
 
-yhat = model.predict(x_input)
-print(yhat)
+y_predict = model.predict(x_predict)
 
-'''
+print(y_predict)

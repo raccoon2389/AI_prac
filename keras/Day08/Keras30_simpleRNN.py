@@ -16,7 +16,7 @@ LSTM 이란
 
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense,LSTM
+from keras.layers import Dense,SimpleRNN
 from keras.callbacks import EarlyStopping
 
 #1. 데이터

@@ -18,14 +18,14 @@ print("shape of x : ", x.shape)
 
 #2 모델 구성f
 input1 = Input(shape=(3,1))
-lstm1_1 = LSTM(7,activation='tanh',return_sequences=True)(input1) # 배열을 2d가 아닌 3d로 출력하게 만든다.
-lstm1_2 = LSTM(7,activation='tanh',return_sequences=True)(lstm1_1)
-lstm1_2 = LSTM(7,activation='tanh',return_sequences=True)(lstm1_2)
-lstm1_2 = LSTM(7,activation='tanh',return_sequences=True)(lstm1_2)
-lstm1_2 = LSTM(7,activation='tanh')(lstm1_2)
+lstm1_1 = LSTM(5,activation='tanh',return_sequences=True)(input1) # 배열을 2d가 아닌 3d로 출력하게 만든다.
+lstm1_2 = LSTM(5,activation='tanh',return_sequences=True)(lstm1_1)
+lstm1_2 = LSTM(5,activation='tanh',return_sequences=True)(lstm1_1)
+lstm1_2 = LSTM(5,activation='tanh',return_sequences=True)(lstm1_1)
+lstm1_2 = LSTM(5,activation='tanh',return_sequences=True)(lstm1_1)
+lstm1_2 = LSTM(5,activation='tanh')(lstm1_2)
 output3 = Dense(10,activation='relu')(lstm1_2)
-output3 = Dense(5,activation='relu')(lstm1_2)
-output3 = Dense(3,activation='relu')(lstm1_2)
+output3 = Dense(5,activation='relu')(output3 )
 
 output3 = Dense(1,activation='relu')(output3)
 
@@ -39,8 +39,8 @@ model.summary()
 # 실행
 model.compile(optimizer='adam', loss='mse')
 
-e_stop = EarlyStopping(monitor='loss',mode='auto',patience=50)
-model.fit(x,y,epochs=10000,callbacks=[e_stop])
+e_stop = EarlyStopping(monitor='loss',mode='auto',patience=18)
+model.fit(x,y,epochs=10000,callbacks=[e_stop],batch_size=1)
 
 x_input = np.array([55,65,75])
 x_input = x_input.reshape(1,3,1)

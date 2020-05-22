@@ -18,7 +18,7 @@ scalar.fit(x)
 x = scalar.transform(x)
 print("shape of x : ", x)
 
-x_predict = x_predict.reshape(3,)
+x_predict = x_predict.reshape(1,3)
 x_predict = scalar.transform(x_predict)
 
 x = x.reshape(x.shape[0],3,1)
@@ -26,10 +26,7 @@ x = x.reshape(x.shape[0],3,1)
 print("shape of x : ", x.shape)
 
 input1 = Input(shape=(3,1))
-lstm1_1 = LSTM(600,activation='tanh')(input1) # 배열을 2d가 아닌 3d로 출력하게 만든다.
-lstm1_1 = Dense(10,activation='relu')(lstm1_1)
-lstm1_1 = Dense(10,activation='relu')(lstm1_1)
-lstm1_1 = Dense(10,activation='relu')(lstm1_1)
+lstm1_1 = LSTM(500,activation='tanh')(input1) # 배열을 2d가 아닌 3d로 출력하게 만든다.
 lstm1_1 = Dense(10,activation='relu')(lstm1_1)
 lstm1_1 = Dense(10,activation='relu')(lstm1_1)
 lstm1_1 = Dense(10,activation='relu')(lstm1_1)

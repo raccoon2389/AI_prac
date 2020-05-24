@@ -49,3 +49,16 @@ def sum_and_product(x,y): # 함수가 복수의 값을 반환할떄 튜플이 �
 sp = sum_and_product(2,3) #sp = (2,3)
 s,p = sum_and_product(4,5) # s=9 p = 20
 
+#dictionary
+empty_dict = {}
+empty_dict2 = dict()
+grades = {"Jo":80 ,"rha": 95}
+
+Jo_grade = grades["Jo"] # 80
+
+#sorting
+
+x= [5,34,2,1,4]
+y = sorted(x) #정렬된 x 를 리턴
+x.sort # x 리스트 자체를 소팅해줌
+

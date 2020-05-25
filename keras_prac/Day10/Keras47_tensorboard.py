@@ -2,9 +2,8 @@ import os,sys
 import numpy as np
 from keras.models import Sequential, load_model, Input
 from keras.layers import Dense, LSTM
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping,TensorBoard
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
 from Day09.Keras39_split import split_X
 
 #1 데이터
@@ -31,8 +30,8 @@ model.summary()
 model.compile(optimizer='adam', loss = 'mse')
 
 e_stop = EarlyStopping(monitor='loss',patience=40,mode='auto')
-
-model.fit(x_train,y_train,batch_size=1,epochs=10000,callbacks=[e_stop])
+t_board = TensorBoard(log_dir='.\graph', histogram_freq=0,batch_size=1,write_graph=True, write_images=True)
+model.fit(x_train,y_train,batch_size=1,epochs=10000,callbacks=[e_stop,t_board])
 
 mse = model.evaluate(x_train, y_train, batch_size=1)
 
@@ -40,5 +39,4 @@ print("MSE : ",mse)
 x_predict = np.array([10,11,12,13])
 x_predict = x_predict.reshape(1,4,1)
 y_predict = model.predict(x_predict,batch_size=1)
-
 print(x_predict,y_predict)

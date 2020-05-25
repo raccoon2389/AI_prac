@@ -15,9 +15,19 @@ def split_X(seq,size):
     print(type(aaa))
     return np.array(aaa)
 
+# def split_X(seq,size):
+#     aaa = []
+#     bbb = []
+#     for i in range(len(seq) - size +1 ): # len(seq) - size +1 = 몇개의 행을 갖을수 있는지 계산
+#         subset = seq[i: (i+size)] # 한행에 넣을 데이터 추출
+#         aaa.append(subset[:-1]) # subset에 있는 item을 shape에 맞게 aaa 뒤에 행 추가
+#         bbb.append(subset[-1])
+#     return (np.array(aaa), np.array(bbb))
 
 dataset = split_X(a,size)
 
+
 print('===============================')
 print(dataset)
+print(dataset.shape)
 print('===============================')

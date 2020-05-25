@@ -62,3 +62,10 @@ x= [5,34,2,1,4]
 y = sorted(x) #정렬된 x 를 리턴
 x.sort # x 리스트 자체를 소팅해줌
 
+#comprehension
+odd = [x for x in range(10) if x % 2 == 1] #[1,3,5,7,9]
+square = [x*x for x in range(5)] #[1,4,9,16,25]
+odd_squre = [x*x for x in odd] #1,9,...
+
+zeros = [1 for _ in odd]
+print(zeros)

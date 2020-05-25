@@ -22,9 +22,9 @@ x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1)
 
 print(x_train)
 
-model = load_model("./keras_prac/model/save_keras_45.h5")
+model = load_model("./keras_prac/model/save_keras_45.h5") # 로드 모델을 사용
 
-model.add(Dense(1, name= 'new'))
+model.add(Dense(1, name= 'new')) # 새로운 노드 붙힐때는 이름 안겹치게
 
 model.summary()
 

@@ -68,4 +68,11 @@ square = [x*x for x in range(5)] #[1,4,9,16,25]
 odd_squre = [x*x for x in odd] #1,9,...
 
 zeros = [1 for _ in odd]
-print(zeros)
+# print(zeros)
+
+pairs = [[x,y] for x in range(10) for y in range(x+1,10)]# x와 y값 for 중복문
+#print(pairs)
+
+def mini(xs):
+    return min(xs)
+assert mini([1,2,3,2]) == 2 ,"1잋냐ㅓ챠"

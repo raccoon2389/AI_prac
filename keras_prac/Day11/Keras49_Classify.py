@@ -32,7 +32,7 @@ model.add(Dense(5,activation='softmax'))
 
 model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['acc'])
 
-model.fit(x,y,batch_size=1,epochs=1000,callbacks=[e_stop,t_board])
+model.fit(x,y,batch_size=1,epochs=10,callbacks=[e_stop,t_board])
 
 loss, acc = model.evaluate(x,y,batch_size=1)
 print(f"loss : {loss}\nacc : {acc}")

@@ -7,9 +7,7 @@ from keras.layers import Dense,LSTM
 from keras.callbacks import EarlyStopping, TensorBoard
 e_stop = EarlyStopping(monitor='loss', patience=50, mode='auto')
 t_board = TensorBoard(log_dir='.\graph',histogram_freq=0,batch_size=1,write_graph=True, write_grads=True, write_images=True,)
-def sigmoid(x):
-    return 1/(1+np.exp(-x))
-    
+
 x= np.array(range(1,11))
 y = np.array([1,0,1,0,1,0,1,0,1,0])
 
@@ -34,6 +32,10 @@ loss, acc = model.evaluate(x,y,batch_size=1)
 print(f"loss : {loss}\nacc : {acc}")
 
 y_pre = model.predict(x,batch_size=1)
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+    
 for i in range(y_pre.shape[0]):
     if y_pre[i]<0.5:
         y_pre[i]= 0

@@ -41,3 +41,13 @@ def doubler_correct(f):
 
 g = doubler_correct(f2)
 print(g(2,2)) 
+
+
+#딱히 기능을 하지는 않지만 데이터 타입을 명시 (3.6부터 가능)
+
+def add(a: int ,b: int) -> int:         
+    return a,b
+
+# add('s','s')
+
+#float 를 갖는 list

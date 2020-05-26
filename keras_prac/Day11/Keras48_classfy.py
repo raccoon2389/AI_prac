@@ -14,10 +14,13 @@ x= np.array(range(1,11))
 y = np.array([1,0,1,0,1,0,1,0,1,0])
 
 model = Sequential()
-model.add(Dense(100,activation='relu',input_dim = 1))
+model.add(Dense(1000,activation='relu',input_dim=1))
+model.add(Dense(500,activation='relu'))
+model.add(Dense(200,activation='relu'))
+model.add(Dense(100,activation='relu'))
 model.add(Dense(50,activation='relu'))
 model.add(Dense(50,activation='relu'))
-model.add(Dense(10,activation='relu'))
+model.add(Dense(50,activation='relu'))
 model.add(Dense(10,activation='relu'))
 model.add(Dense(1,activation='sigmoid'))
 
@@ -25,11 +28,16 @@ model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc']) # 이
 
 
 
-model.fit(x,y,batch_size=1,epochs=100,callbacks=[e_stop,t_board])
+model.fit(x,y,batch_size=1,epochs=1000,callbacks=[e_stop,t_board])
 
 loss, acc = model.evaluate(x,y,batch_size=1)
 print(f"loss : {loss}\nacc : {acc}")
 
 y_pre = model.predict(x,batch_size=1)
+for i in range(y_pre.shape[0]):
+    if y_pre[i]<0.5:
+        y_pre[i]= 0
+    else:
+        y_pre[i]=1
 
 print(f"predict : {y_pre}")

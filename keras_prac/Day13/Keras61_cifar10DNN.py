@@ -21,10 +21,11 @@ input1 = Input(shape=(x_train.shape[1],))
 
 
 hid = Dense(5000,activation='relu')(input1)
-hid = Dropout(0.1)(hid)
+hid = Dropout(0.3)(hid)
 hid = Dense(200,activation='relu')(hid)
-hid = Dropout(0.1)(hid)
+hid = Dropout(0.3)(hid)
 hid = Dense(200,activation='relu')(hid)
+hid = Dropout(0.3)(hid)
 output1 = Dense(10,activation='softmax')(hid)
 
 model = Model(inputs=[input1], outputs=[output1])
@@ -35,3 +36,4 @@ model.compile(optimizer='adam',loss='categorical_crossentropy', metrics=['acc'])
 model.fit(x_train,y_train,batch_size=500,epochs=100,validation_split=0.3, callbacks=[e_stop,t_board])
 
 loss, acc = model.evaluate(x_test,y_test,batch_size=100)
+print(loss,acc)

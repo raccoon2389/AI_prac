@@ -16,5 +16,5 @@ print(x_test.shape)
 print(y_train.shape)
 print(y_test.shape)
 
-plt.imshow(x_train[0],'gray')
+plt.imshow(x_train[1],'gray')
 plt.show()

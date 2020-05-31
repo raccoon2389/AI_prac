@@ -30,8 +30,8 @@ x_test = scaler.transform(x_test)
 
 print(x_train[0])
 
-x_train = x_train.reshape(x_train.shape[0],64,48).astype('float32')/255.
-x_test = x_test.reshape(x_test.shape[0],64,48).astype('float32')/255.
+x_train = x_train.reshape(x_train.shape[0],30,1)
+x_test = x_test.reshape(x_test.shape[0],30,1)
 
 input1 = Input(shape=(x_train.shape[1],x_train.shape[2]))
 
@@ -49,7 +49,7 @@ model = Model(inputs=[input1], outputs=[output1])
 model.summary()
 
 model.compile(optimizer='adam',loss='binary_crossentropy', metrics=['acc'])
-hist = model.fit(x_train,y_train,batch_size=500,epochs=100,validation_split=0.2)
+hist = model.fit(x_train,y_train,batch_size=10,epochs=100,validation_split=0.2)
 
 loss_acc = model.evaluate(x_test,y_test,batch_size=100)
 

@@ -29,19 +29,22 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
 print(x_train[0])
+x_train = x_train.reshape(x_train.shape[0],6,5,1)
+x_test = x_test.reshape(x_test.shape[0],6,5,1)
+input1 = Input(shape=(x_train.shape[1],x_train.shape[2],1))
 
 
-input1 = Input(shape=(x_train.shape[1],))
 
-
-hid = Dense(400,activation='relu')(input1)
+hid = Conv2D(10,(2,2),padding='same',activation='relu')(input1)
+# hid = MaxPooling2D(pool_size=(2,2))(hid)
+hid = Dropout(0.4)(hid)
+# hid = Conv2D(10,(2,2),padding='same',activation='relu')(hid)
+# hid = MaxPooling2D(pool_size=(2,2))(hid)
 hid = Dropout(0.3)(hid)
-hid = Dense(200,activation='relu')(input1)
-hid = Dropout(0.3)(hid)
-hid = Dense(100,activation='relu')(input1)
-hid = Dropout(0.3)(hid)
-output1 = Dense(2,activation='softmax')(hid)
 
+hid = Flatten()(hid)
+output1 = Dense(200,activation='relu')(hid)
+output1 = Dense(1)(hid)
 model = Model(inputs=[input1], outputs=[output1])
 
 model.summary()

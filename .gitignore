@@ -1,3 +1,5 @@
 .vscode/settings.json
 graph/*
 model/*
+*.h5
+*.hdf5

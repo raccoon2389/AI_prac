@@ -1,6 +1,6 @@
 .vscode/settings.json
 graph/*
-model/*
+keras_prac/model/*
 *.h5
 *.hdf5
 data/*

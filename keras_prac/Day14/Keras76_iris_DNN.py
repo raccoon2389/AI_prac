@@ -24,12 +24,11 @@ scalar.fit(x_train)
 x_train = scalar.transform(x_train)
 x_test = scalar.transform(x_test)
 
-x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1).astype('float32')/255.
-x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1).astype('float32')/255.
+x_train = x_train.reshape(x_train.shape[0],-1).astype('float32')/255.
+x_test = x_test.reshape(x_test.shape[0],-1).astype('float32')/255.
 
-input1 = Input(shape=(x_train.shape[1],x_train.shape[2]))
-
-hid = LSTM(200,activation='relu')(input1)
+input1 = Input(shape=(x_train.shape[1],))
+hid = Dense(200,activation='relu')(input1)
 hid = Dropout(0.2)(hid)
 hid = Dense(100,activation='relu')(hid)
 hid = Dropout(0.2)(hid)

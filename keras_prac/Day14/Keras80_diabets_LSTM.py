@@ -38,9 +38,9 @@ model = Model(inputs=[input1], outputs=[output1])
 model.summary()
 
 model.compile(optimizer='adam',loss='mse', metrics=['acc'])
-hist = model.fit(x_train,y_train,batch_size=1,epochs=10000,validation_split=0.2, callbacks=[e_stop,m_check])
+hist = model.fit(x_train,y_train,batch_size=10,epochs=10000,validation_split=0.3, callbacks=[e_stop,m_check])
 
-loss_acc = model.evaluate(x_test,y_test,batch_size=100)
+loss_acc = model.evaluate(x_test,y_test,batch_size=10)
 
 loss = hist.history['loss']
 val_loss = hist.history['val_loss']

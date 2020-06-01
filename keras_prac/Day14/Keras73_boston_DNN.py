@@ -1,15 +1,17 @@
 import numpy as np
 from sklearn.datasets import load_boston
 from keras.models import Sequential, Model
-from keras.utils import np_utils
 from keras.layers import Dense,Conv2D,Flatten,MaxPooling2D,Dropout,Input
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+path = './keras_prac/model/sample/'
 
 e_stop = EarlyStopping(monitor='loss',patience=5,mode='auto')
-modelpath = "./keras_prac/model/{epoch:02d}--{val_loss:.4f}.hdf5"
+modelpath = path + "/boston--{epoch:02d}--{val_loss:.4f}.hdf5"
 m_check = ModelCheckpoint(filepath=modelpath, monitor = 'val_loss',save_best_only=True)
 
 # print(y.shape)
@@ -41,10 +43,13 @@ model = Model(inputs=[input1], outputs=[output1])
 
 model.summary()
 
-model.compile(optimizer='adam',loss='mse', metrics=['acc'])
-hist = model.fit(x_train,y_train,batch_size=1,epochs=10000,validation_split=0.2, callbacks=[e_stop,m_check])
+model.save(path+"/boston_save.h5")
 
-loss_acc = model.evaluate(x_test,y_test,batch_size=100)
+model.compile(optimizer='adam',loss='mse', metrics=['acc'])
+hist = model.fit(x_train,y_train,batch_size=1,epochs=1000,validation_split=0.2, callbacks=[e_stop,m_check])
+model.save_weights(path+"/boston_save_weight.h5")
+
+loss_acc = model.evaluate(x_test,y_test,batch_size=10)
 
 loss = hist.history['loss']
 val_loss = hist.history['val_loss']

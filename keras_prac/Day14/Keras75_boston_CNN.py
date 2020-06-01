@@ -7,7 +7,7 @@ from keras.callbacks import EarlyStopping,ModelCheckpoint
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA #robust와 pca로 이상치 제거 가능 PCA하기전에 반드시 standard scaler
+from sklearn.decomposition import PCA #robust와 pca로 이상치 제거 가능 PCA(column 압축)하기전에 반드시 standard scaler
 
 e_stop = EarlyStopping(monitor='loss',patience=5,mode='auto')
 modelpath = "./keras_prac/model/{epoch:02d}--{val_loss:.4f}.hdf5"

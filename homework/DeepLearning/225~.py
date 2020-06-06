@@ -41,4 +41,11 @@ mask = [True,False,True,False]
 df = pd.DataFrame([seri,seri,seri])
 
 df.index = ["a","b","c"]
+
+df.index = [1,2,3]
+
+data = pd.Series([[300,100,10],[10,20,30],[1,2,3],[2,2,2]],index=["ap","ba","ca","da"])
+df = df.append(data,ignore_index=True)
+
+df["ea"]=[1,2,3,4]
 print(df)

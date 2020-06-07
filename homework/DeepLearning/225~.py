@@ -48,4 +48,5 @@ data = pd.Series([[300,100,10],[10,20,30],[1,2,3],[2,2,2]],index=["ap","ba","ca"
 df = df.append(data,ignore_index=True)
 
 df["ea"]=[1,2,3,4]
-print(df)
+
+print(df.loc[[2,3],["ca","da"]])

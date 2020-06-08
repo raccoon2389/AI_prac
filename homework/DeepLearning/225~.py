@@ -44,9 +44,19 @@ df.index = ["a","b","c"]
 
 df.index = [1,2,3]
 
-data = pd.Series([[300,100,10],[10,20,30],[1,2,3],[2,2,2]],index=["ap","ba","ca","da"])
+data = pd.Series([300,20,1,2],index=["ap","ba","ca","da"])
 df = df.append(data,ignore_index=True)
 
 df["ea"]=[1,2,3,4]
 
-print(df.loc[[2,3],["ca","da"]])
+# print(df.loc[[2,3],["ca","da"]])
+
+# print(df.iloc[[1,3],range(3)])
+
+df2 = df.drop([1,2])
+df3 = df.drop("ca",axis=1)
+df2 = df.drop([0,2])
+df = df.sort_values(by="ap",ascending=True)
+
+print(df[df.index % 2 == 1])
+print(df.loc[df["ap"]>20])

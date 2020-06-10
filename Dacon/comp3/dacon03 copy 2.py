@@ -8,19 +8,25 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
-
+from sklearn.model_selection import KFold,RandomizedSearchCV,cross_val_score,cross_validate
+from numpy.random import randint
 m_check = ModelCheckpoint("./model/comp3/--{epoch:02d}--{val_loss:.4f}.hdf5", monitor = 'val_loss',save_best_only=True)
 
 
 def split_X(seq,size):
+    scal = MinMaxScaler()
+    scal.fit(seq)
+    seq = scal.transform(seq)
     aaa = np.zeros((len(seq) - size+1,size,4),dtype=np.float64)
+    # print(seq.shape)
     idx = 0
     for i in range(0,len(seq) - size +1): # len(seq) - size +1 = 몇개의 행을 갖을수 있는지 계산
         subset = seq[i: (i+size),:] # 한행에 넣을 데이터 추출
         aaa[idx]= subset # subset에 있는 item을 shape에 맞게 aaa 뒤에 행 추가
         idx += 1
 
-    return (aaa, seq[len(seq)-size:])
+    # print(aaa[0])
+    return (aaa, seq[len(seq)-size:] ,scal)
 
 
 def kaeri_metric(y_true, y_pred):
@@ -63,7 +69,7 @@ def E2(y_true, y_pred):
     return np.mean(np.sum(np.square((_t - _p) / (_t + 1e-06)), axis = 1))
 
 
-'''
+
 train_feat = pd.read_csv('./data/dacon/comp3/train_features.csv',sep=',',header=0)
 train_target = pd.read_csv('./data/dacon/comp3/train_target.csv',sep=',',header=0)
 test_feat= pd.read_csv('./data/dacon/comp3/test_features.csv',sep=',',header=0)
@@ -83,148 +89,90 @@ submit = pd.read_csv('./data/dacon/comp3/sample_submission.csv',sep=',',header=0
 # print(train_feat["id"].max())
 ########################
 
-feat = np.zeros((train_feat["id"].max()+1,train_feat.loc[train_feat.loc[:,"id"]==0].shape[0],4),dtype=np.float64)
-target = np.zeros((train_target["id"].max()+1,4),dtype=np.float64)
-test= np.zeros((700,375,4),dtype=np.float64)
+train_df = pd.DataFrame(index = train_target['id'])
+# train_fe_max = train_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
+# train_fe_min = train_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
+# train_fe_mean = train_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
+# train_fe_std = train_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
+# train_fe_median = train_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
+# train_fe_skew = train_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
+print(train_feat.iloc[1,1])
+dist = np.zeros((2800,4))
+for i in range(1):
+    idx=0
+    for p in ['S1']:#,'S2','S3','S4']:
+        tmp = train_feat.loc[train_feat["id"]==1,p]
+        idx+=1
+        # print(tmp)
+        for c in tmp.values:
+            # print(c)
+            if c!=0:
+                print(c)
+                dist[i,idx] = c
+                break
+                
 
-# for i in range(train_feat["id"].max()+1):
-#     feat[i] = train_feat.loc[train_feat.loc[:,"id"]==i,'S1':].values
-#     target[i] = train_target.loc[train_target.loc[:,"id"]==i,"X":].values
 
-
-for i in range(700):
-    test[i] = test_feat.loc[test_feat.loc[:,"id"]==i+2800,'S1':].values
-
-
-
-print(test.shape)
-# np.save('./data/dacon/comp3/feat.npy',feat)
-# np.save('./data/dacon/comp3/target.npy',target)
-np.save('./data/dacon/comp3/test.npy',test)
+print(dist)
 
 '''
+train_df = pd.concat([train_df, train_fe_max, train_fe_min, train_fe_mean, train_fe_std, train_fe_median, train_fe_skew], axis=1)
+
+test_df = pd.DataFrame(index=submit['id'])
+test_fe_max = test_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
+test_fe_min = test_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
+test_fe_mean = test_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
+test_fe_std = test_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
+test_fe_median = test_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
+test_fe_skew = test_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
+test_df = pd.concat([test_df, test_fe_max, test_fe_min, test_fe_mean, test_fe_std, test_fe_median, test_fe_skew], axis=1)
+
+
+feat = train_df.values
+test = test_df.values
+
+
+np.save('./data/dacon/comp3/feat_pre.npy',feat)
+# np.save('./data/dacon/comp3/target.npy',target)
+np.save('./data/dacon/comp3/test_pre.npy',test)
+
+
 
 
 ############### 데이터 불러오기 ########################
-feat = np.load('./data/dacon/comp3/feat.npy')
+feat = np.load('./data/dacon/comp3/feat_pre.npy')
 target = np.load('./data/dacon/comp3/target.npy')
-test = np.load('./data/dacon/comp3/test.npy')
+test = np.load('./data/dacon/comp3/test_pre.npy')
 ###################################################
 
 
 
 ############### 1번 트레인 #####################
-'''
-train2 = np.zeros((2800,10,4))
-test2 = np.zeros((700,10,4))
-scal = MinMaxScaler()
-tmp = feat.reshape(2800,-1)
-scal.fit(tmp)
-feat = scal.transform(tmp).reshape(2800,375,4)
-# print(test)
-test = test.reshape(700,375*4)
-test = scal.transform(test)
-test = test.reshape(700,-1,4)
-
-for i in range(2800):
-    tmp , pred = split_X(feat[i],50)
-
-    # print(tmp.shape)
-
-    tmp = tmp.reshape(-1,50,4)
-    pred = pred.reshape(1,50,4)
-    pred = pred[:,10:,:]
-    x = tmp[:,:-10,:]
-    y= tmp[:,-10:,:].reshape(-1,40)
-    # print(y.shape)
-    # y = scal.inverse_transform(y)
-
-    model = Sequential()
-    model.add(Conv1D(40,6,input_shape=(40,4)))
-    model.add(Flatten())
-    model.add(Dense(100,activation='relu'))
-    model.add(Dense(40))
-    model.compile(optimizer='rmsprop',loss='mse',metrics=['mse'])
-    model.fit(x,y,batch_size=20,epochs=30,validation_split=0.25)
-    y = model.predict(pred)
-    y = y.reshape(-1,10,4)
-    train2[i] = y
-
-np.save('./data/dacon/comp3/train2.npy',train2)
-
-# for i in range(700):
-#     tmp , pred, scal = split_X(test[i],50)
-
-#     # print(tmp.shape)
-
-#     tmp = tmp.reshape(-1,50,4)
-#     pred = pred.reshape(1,50,4)
-#     pred = pred[:,10:,:]
-#     x = tmp[:,:-10,:]
-#     y= tmp[:,-10:,:].reshape(-1,40)
-
-#     # print(y.shape)
-#     # y = scal.inverse_transform(y)
-
-#     model = Sequential()
-#     model.add(Conv1D(40,6,input_shape=(40,4)))
-#     model.add(Flatten())
-#     model.add(Dense(100,activation='relu'))
-#     model.add(Dense(40))
-#     model.compile(optimizer='rmsprop',loss='mse',metrics=['mse'])
-#     model.fit(x,y,batch_size=20,epochs=30,validation_split=0.25)
-#     y = model.predict(pred)
-#     y = y.reshape(-1,10,4)
-#     test2[i] = y
-#     np.save('./data/dacon/comp3/test2.npy',test2)
-'''
-##############################################################
-
-
-##################### 2번째 train ###################
-
-train = np.load('./data/dacon/comp3/train2.npy')
-test = np.load('./data/dacon/comp3/test2.npy')
-
-# train = train.reshape(-1,40)
-print(test.shape)
-
-model = Sequential()
-
-model.add(LSTM(200,input_shape=(10,4)))
-model.add(Dropout(0.4))
-model.add(Dense(100,activation='relu'))
-model.add(Dense(4))
-
-model.compile(optimizer='rmsprop',loss='mse')
-model.fit(train,target,batch_size=20,epochs=150,validation_split=0.25,callbacks=[m_check])
-
-
-# model = load_model('./model/comp3/--117--24959.8967.hdf5')
-
-y = model.predict(train)
-score = kaeri_metric(target,y)
-print(score)
-# df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
-
-# df.to_csv('./comp3.csv')
 
 ####################################################################
 
 #####################  ML ###########################
-'''
 
-for i in range(2800):
-    tmp = feat[i,:,:]
-    pipe = Pipeline([("scal",MinMaxScaler()),("ran",RandomForestRegressor())])
-    # ranfo = MultiOutputRegressor(pipe())
-    pipe.fit(tmp)
-    y= pipe.predict(tmp)
-    print(y,i)
-'''
+
+kf = KFold()
+param = [
+    {"ranfo__n_estimators": randint(2,100)},
+    {"ranfo__":}
+]
+piii = Pipeline([("scal",MinMaxScaler()),("ranfo",RandomForestRegressor())])
+model = RandomizedSearchCV(piii,param_distributions=param)
+
+model.fit(feat,target)
+y = model.predict(test)
+print(y)
+
+df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
+
+df.to_csv('./comp3.csv')
+
 ####################################################
 
-
+'''
 # FFT
 '''
 # feat = split_X(feat,10)

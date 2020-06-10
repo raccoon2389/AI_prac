@@ -6,7 +6,7 @@ from keras.layers import Dense,LSTM,Dropout,Conv1D,Flatten,MaxPooling1D
 from keras.callbacks import ModelCheckpoint
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline,make_pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import KFold,RandomizedSearchCV,cross_val_score,cross_validate
 from numpy.random import randint
@@ -135,20 +135,26 @@ test = np.load('./data/dacon/comp3/test_pre.npy')
 
 
 kf = KFold()
-param = [
-    {"ranfo__n_estimators": randint(2,100)},
-    {"ranfo__":}
+parameters = [
+    {"randomforestregressor__n_estimators" :[1, 10, 100, 1000],"randomforestregressor__max_depth":[None,10,30,50,100],"randomforestregressor__min_samples_split":[2,4,8,16],
+    "randomforestregressor__min_samples_leaf":[1,5,10,30]}
 ]
-piii = Pipeline([("scal",MinMaxScaler()),("ranfo",RandomForestRegressor())])
-model = RandomizedSearchCV(piii,param_distributions=param)
+pipe = make_pipeline(MinMaxScaler(), RandomForestRegressor())
 
-model.fit(feat,target)
-y = model.predict(test)
-print(y)
+ran = RandomForestRegressor()
 
-df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
+ran.fit(feat,target)
+print(ran.feature_importances_)
 
-df.to_csv('./comp3.csv')
+# model = RandomizedSearchCV(pipe, parameters, cv=5)
+
+# feat = model.fit(feat,target)
+# y = model.predict(test)
+# print(y)
+
+# df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
+
+# df.to_csv('./comp3.csv')
 
 ####################################################
 

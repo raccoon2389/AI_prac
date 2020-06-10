@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 # 1. 데이터
@@ -17,9 +18,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, shuff
 
 # 그리드 / 랜덤 서치에서 사용할 매개 변수
 parameters = [
-    {"svc__C" :[1, 10, 100, 1000], "svc__kernel" :['linear']},
-    {"svc__C" :[1, 10, 100], "svc__kernel" :['rbf'], 'svc__gamma':[0.001, 0.0001]},
-    {"svc__C" :[1, 100, 1000], "svc__kernel" :['sigmoid'], 'svc__gamma':[0.001, 0.0001]}
+    {"randomforestclassifier__n_estimators" :[1, 10, 100, 1000],"randomforestclassifier__max_depth":[None,10,30,50,100],"randomforestclassifier__min_samples_split":[2,4,8,16],
+    "randomforestclassifier__min_samples_leaf":[1,5,10,30]}
 ]
 
 # 2. 모델
@@ -30,7 +30,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 # pipe = Pipeline([("scaler", MinMaxScaler()), ('svc', SVC())])
 # pipe = make_pipeline(MinMaxScaler(),SVC())
-pipe = make_pipeline(MinMaxScaler(), SVC())
+pipe = make_pipeline(MinMaxScaler(), RandomForestClassifier())
 
 model = RandomizedSearchCV(pipe, parameters, cv=5)
 

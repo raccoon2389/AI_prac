@@ -1,17 +1,13 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from keras.models import Sequential, load_model
-from keras.layers import Dense,LSTM,Dropout,Conv1D,Flatten,MaxPooling1D
-from keras.callbacks import ModelCheckpoint
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.pipeline import Pipeline,make_pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import KFold,RandomizedSearchCV,cross_val_score,cross_validate
 from numpy.random import randint
-m_check = ModelCheckpoint("./model/comp3/--{epoch:02d}--{val_loss:.4f}.hdf5", monitor = 'val_loss',save_best_only=True)
-
+import xgboost as xgb
 
 def split_X(seq,size):
     scal = MinMaxScaler()
@@ -123,8 +119,9 @@ np.save('./data/dacon/comp3/test_pre.npy',test)
 feat = np.load('./data/dacon/comp3/feat_pre.npy')
 target = np.load('./data/dacon/comp3/target.npy')
 test = np.load('./data/dacon/comp3/test_pre.npy')
+submission = pd.read_csv('./data/dacon/comp3/sample_submission.csv')
 ###################################################
-
+print(target.shape)
 
 
 ############### 1번 트레인 #####################
@@ -135,16 +132,49 @@ test = np.load('./data/dacon/comp3/test_pre.npy')
 
 
 kf = KFold()
-parameters = [
-    {"randomforestregressor__n_estimators" :[1, 10, 100, 1000],"randomforestregressor__max_depth":[None,10,30,50,100],"randomforestregressor__min_samples_split":[2,4,8,16],
-    "randomforestregressor__min_samples_leaf":[1,5,10,30]}
-]
-pipe = make_pipeline(MinMaxScaler(), RandomForestRegressor())
 
-ran = RandomForestRegressor()
+def train_model(x_data, y_data, k=5):
+    models = []
+    
+    k_fold = KFold(n_splits=k, shuffle=True, random_state=123)
+    
+    for train_idx, val_idx in k_fold.split(x_data):
+        x_train, y_train = x_data[train_idx], y_data[train_idx] # 훈련 데이터를 kfold로 자른다
+        x_val, y_val = x_data[val_idx], y_data[val_idx] # 검증용 데이터도 자름
+    
+        d_train = xgb.DMatrix(data = x_train, label = y_train) # 훈련 데이터를 xgb가 이용하기 쉬운 DMatrix로 변환해준다
+        d_val = xgb.DMatrix(data = x_val, label = y_val)
+        
+        wlist = [(d_train, 'train'), (d_val, 'eval')]
+        
+        params = {                                          #파라미터
+            'objective': 'reg:squarederror',
+            'eval_metric': 'mae',
+            'seed':777
+            }
 
-ran.fit(feat,target)
-print(ran.feature_importances_)
+        model = xgb.train(params=params, dtrain=d_train, num_boost_round=500, verbose_eval=500, evals=wlist) # 모델을 짜준다 
+        models.append(model)
+    
+    return models
+
+models = {}
+
+for label in range(4):
+    y_col =['X','Y','M','V']
+    print('train column : ', label)
+    models[y_col[label]] = train_model(feat, target[:,label])
+    print('\n\n\n')
+
+for col in models:
+    preds = []
+    for model in models[col]:
+        preds.append(model.predict(xgb.DMatrix(test)))
+    pred = np.mean(preds, axis=0)
+
+    submission[col] = pred
+submission.to_csv('Dacon.csv',index=False)
+
 
 # model = RandomizedSearchCV(pipe, parameters, cv=5)
 

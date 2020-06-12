@@ -60,3 +60,5 @@ df = df.sort_values(by="ap",ascending=True)
 
 print(df[df.index % 2 == 1])
 print(df.loc[df["ap"]>20])
+
+

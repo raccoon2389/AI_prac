@@ -62,3 +62,6 @@ print(df[df.index % 2 == 1])
 print(df.loc[df["ap"]>20])
 
 
+# df = pd.read_csv()
+
+import csv

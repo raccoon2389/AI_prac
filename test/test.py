@@ -1,1 +1,2 @@
-[1,2,3,4].value
+import numpy as np
+print(np.random.

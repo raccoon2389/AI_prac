@@ -1,16 +1,17 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from keras.models import Sequential, load_model
-from keras.layers import Dense,LSTM,Dropout,Conv1D,Flatten,MaxPooling1D
-from keras.callbacks import ModelCheckpoint
+# from keras.models import Sequential, load_model
+# from keras.layers import Dense,LSTM,Dropout,Conv1D,Flatten,MaxPooling1D
+# from keras.callbacks import ModelCheckpoint
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import KFold,RandomizedSearchCV,cross_val_score,cross_validate
+from sklearn.model_selection import KFold,RandomizedSearchCV,cross_val_score,cross_validate,train_test_split
 from numpy.random import randint
-m_check = ModelCheckpoint("./model/comp3/--{epoch:02d}--{val_loss:.4f}.hdf5", monitor = 'val_loss',save_best_only=True)
+from xgboost import XGBRFRegressor
+# m_check = ModelCheckpoint("./model/comp3/--{epoch:02d}--{val_loss:.4f}.hdf5", monitor = 'val_loss',save_best_only=True)
 
 
 def split_X(seq,size):
@@ -96,26 +97,65 @@ train_df = pd.DataFrame(index = train_target['id'])
 # train_fe_std = train_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
 # train_fe_median = train_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
 # train_fe_skew = train_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
-print(train_feat.iloc[1,1])
-dist = np.zeros((2800,4))
-for i in range(1):
+# print(train_feat.iloc[1,1])
+
+
+#################   XY만 따로 구하기    ##################
+'''
+xyzm= np.zeros((2800,4))
+col =['S1','S2','S3','S4']
+for i in range(2800):
     idx=0
-    for p in ['S1']:#,'S2','S3','S4']:
-        tmp = train_feat.loc[train_feat["id"]==1,p]
-        idx+=1
-        # print(tmp)
-        for c in tmp.values:
-            # print(c)
-            if c!=0:
-                print(c)
-                dist[i,idx] = c
+    for p in range(4):
+        tmp = train_feat.loc[train_feat["id"]==i,col[p]].values
+        for r in range(200):
+            if tmp[r]!=0:
+                xyzm[i,p]=r
                 break
-                
+np.save('./data/dacon/comp3/dist.npy',xyzm)
+'''
+'''
+xyzm= np.zeros((700,4))
+col =['S1','S2','S3','S4']
+for i in range(2800,3500,1):
+    idx=0
+    for p in range(4):
+        tmp = test_feat.loc[test_feat["id"]==i,col[p]].values
+        for r in range(200):
+            if tmp[r]!=0:
+                xyzm[i-2800,p]=r
+                break
+
+np.save('./data/dacon/comp3/dist_test.npy',xyzm)
 
 
-print(dist)
+
+xyzm = np.load('./data/dacon/comp3/dist.npy')
+xyzm_test = np.load('./data/dacon/comp3/dist_test.npy')
+d_y = train_target.loc[:,"X":"Y"].values
+dx_train, dx_test, dy_train,dy_test = train_test_split(xyzm,d_y,test_size=0.2,shuffle=True,random_state=66)
+
+model =MultiOutputRegressor(XGBRFRegressor(learning_rate=1,n_estimators=1000))
+
+model.fit(dx_train,dy_train)
+score = model.score(dx_test,dy_test)
+
+dist = model.predict(xyzm_test)
+XY = pd.DataFrame(dist,index=range(2800,3500,1),columns=["X","Y"])
+XY.index.name='id'
+XY.to_csv('./data/dacon/comp3/XY.csv')
+'''
+
+#####################################################
 
 '''
+train_df = pd.DataFrame(index = train_target['id'])
+train_fe_max = train_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
+train_fe_min = train_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
+train_fe_mean = train_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
+train_fe_std = train_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
+train_fe_median = train_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
+train_fe_skew = train_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
 train_df = pd.concat([train_df, train_fe_max, train_fe_min, train_fe_mean, train_fe_std, train_fe_median, train_fe_skew], axis=1)
 
 test_df = pd.DataFrame(index=submit['id'])
@@ -128,6 +168,7 @@ test_fe_skew = test_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
 test_df = pd.concat([test_df, test_fe_max, test_fe_min, test_fe_mean, test_fe_std, test_fe_median, test_fe_skew], axis=1)
 
 
+
 feat = train_df.values
 test = test_df.values
 
@@ -136,44 +177,47 @@ np.save('./data/dacon/comp3/feat_pre.npy',feat)
 # np.save('./data/dacon/comp3/target.npy',target)
 np.save('./data/dacon/comp3/test_pre.npy',test)
 
-
+'''
 
 
 ############### 데이터 불러오기 ########################
 feat = np.load('./data/dacon/comp3/feat_pre.npy')
-target = np.load('./data/dacon/comp3/target.npy')
+# target = np.load('./data/dacon/comp3/target.npy')
 test = np.load('./data/dacon/comp3/test_pre.npy')
 ###################################################
 
 
 
-############### 1번 트레인 #####################
+############### M,V트레인 #####################
+
+
+print(test.shape)
+
+mv = train_target.loc[:,"M":"V"].values
+
+x_train, x_teast , y_train, y_test = train_test_split(feat,mv,shuffle=True, random_state=55)
+model = MultiOutputRegressor(XGBRFRegressor(learning_rate=1,max_depth=20))
+model.fit(x_train,y_train)
+score = model.score(x_teast,y_test)
+print(score)
+mv = model.predict(test)
+MV = pd.DataFrame(mv,index=range(2800,3500,1),columns=["M","v"])
+MV.index.name = "id"
+MV.to_csv('./data/dacon/comp3/MV.csv')
+
 
 ####################################################################
 
-#####################  ML ###########################
-
-
-kf = KFold()
-param = [
-    {"ranfo__n_estimators": randint(2,100)},
-    {"ranfo__":}
-]
-piii = Pipeline([("scal",MinMaxScaler()),("ranfo",RandomForestRegressor())])
-model = RandomizedSearchCV(piii,param_distributions=param)
-
-model.fit(feat,target)
-y = model.predict(test)
-print(y)
-
-df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
-
-df.to_csv('./comp3.csv')
-
-####################################################
-
+#####################    결과값   ###########################
 '''
-# FFT
+MV = pd.read_csv('./data/dacon/comp3/MV.csv',index_col=0,header=0)
+XY = pd.read_csv('./data/dacon/comp3/XY.csv',index_col=0,header=0)
+sub = pd.concat([XY,MV],axis=1)
+sub.to_csv("./COMP3.csv")
+print(sub.head())
+'''
+#######################################################
+###########         FFT      ##################
 '''
 # feat = split_X(feat,10)
 print(feat.shape)
@@ -189,25 +233,4 @@ for q in range(2800):
 plt.plot(fft[0,:,0])
 
 plt.show()
-'''
-
-
-# for i in range(4):
-#     scal = MinMaxScaler()
-#     scal.fit(feat[:,:,i].reshape(-1,1))
-#     feat[:,:,i] = scal.transform(feat[:,:,i].reshape(-1,1)).reshape(2800,375)
-
-
-
-'''
-print(feat)
-
-model = Sequential()
-model.add(LSTM(50,activation='tanh',dropout=0.25,input_shape=(feat.shape[1],feat.shape[2])))
-model.add(Dense(100,activation='relu'))
-model.add(Dense(100,activation='relu'))
-model.add(Dense(4))
-
-model.compile(optimizer='rmsprop',loss='mse',metrics=['mse'])
-model.fit(feat,target,batch_size=60,epochs=100,validation_split=0.25)
 '''

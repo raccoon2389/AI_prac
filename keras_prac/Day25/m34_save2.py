@@ -33,8 +33,8 @@ score = model.score(x_test,y_test)
 thresholds = np.sort(model.feature_importances_)
 
 # print(thresholds)
-models=[]
-res = np.array([])
+models = [] # 빈 모델 배열 생성
+res = np.array([]) #빈 결과값 배열 생성
 for thres in thresholds: 
     selection = SelectFromModel(model, threshold=thres,prefit=True) #중요하지 않는 컬럼부터 하나씩 빼면서 트레이닝한다
                                         #median
@@ -46,13 +46,13 @@ for thres in thresholds:
 
     score = model2.score(selection_x_test,y_test)
     
-    models.append(model2)
+    models.append(model2) # 모델을 전부 배열에 저장
     print(thres,score)
-    res = np.append(res,score)
+    res = np.append(res,score)# 결과값을 전부 배열에 저장
 print(res.shape)
-best_idx = res.argmax()
-score = res[best_idx]
-total_col = x_train.shape[1]-best_idx
-models[best_idx].save_model(f"./model/Breast_Cancer--{score}--{total_col}--.model")
+best_idx = res.argmax() # 결과값에 최대값의 index 저장
+score = res[best_idx]   # 위 인덱스 기반으로 점수호출
+total_col = x_train.shape[1]-best_idx # 전체컬럼 계산
+models[best_idx].save_model(f"./model/Brest_Cancer--{score}--{total_col}--.model") # 인덱스 기반으로 모델 저장
 #[0.9211316262835174, 0.9222460247849769, 0.9236430220063924, 0.9262235025233723, 0.937
 #[0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7620768226034097, 0.7082987073045375, 0.80076124538689, 0.8048330679881719, 0.801915611200319, 0.8055400705984602, 0.8143305298492035, 0.3770073252812187, 0.3770073252812187, 0.3770073252812187, 0.8638402663982954, 0.8618463692904899, 0.8525860860444583, 0.7546566888769475, 0.7358256568958869, 0.7395166865282418, 0.654621820055117, 0.6389394148921098, 0.8170834335147212, 0.5167681840093151, 0.5891083427195578]

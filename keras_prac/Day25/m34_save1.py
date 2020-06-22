@@ -45,7 +45,7 @@ for thres in thresholds:
     model2.fit(selection_x_train,y_train,verbose=True,eval_metric='mae',eval_set=[(selection_x_train,y_train),(selection_x_test,y_test)],early_stopping_rounds=20)
     result = model2.evals_result()
     score = model2.score(selection_x_test,y_test)
-    shpae = selection_x_train.shape
+    shape = selection_x_train.shape
     models.append(model2) # 모델을 전부 배열에 저장
     print(thres,score)
     res = np.append(res,score)# 결과값을 전부 배열에 저장

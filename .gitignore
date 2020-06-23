@@ -5,3 +5,4 @@ keras_prac/model/*
 *.hdf5
 data/*
 *.npy
+*.model

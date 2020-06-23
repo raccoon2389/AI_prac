@@ -38,6 +38,7 @@ def outliers(data_out):
             out.append(out_col)
 
     elif str(type(data_out))== str("<class 'pandas.core.frame.DataFrame'>"):
+        i=0
         for col in data_out.columns:
             data = data_out[col].values
             quartile_1, quartile_3 = np.percentile(data,[25,75])
@@ -46,10 +47,12 @@ def outliers(data_out):
             iqr = quartile_3 - quartile_1
             lower_bound = quartile_1 - (iqr*1.5)
             upper_bound = quartile_3 + (iqr*1.5)
-            data = data[np.where((data_out>upper_bound)|(data_out<lower_bound))]
+            out_col = np.where((data_out>upper_bound)|(data_out<lower_bound))
+            data_out.iloc[i:out_col]='NaN'
             data = data[out_col]
             print(f"{col}의 이상치값: ", data)
             out.append(out_col)
+            i+=1
     return out
 
 a = np.array([[1,2,3,4,10000,6,7,5000,90,100],[1,2,3,4,10000,6,7,5000,90,100]])

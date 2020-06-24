@@ -6,3 +6,4 @@ keras_prac/model/*
 data/*
 *.npy
 *.model
+*.pyc

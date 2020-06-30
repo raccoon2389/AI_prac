@@ -152,12 +152,14 @@ def create_model(x_data,y_data):
         wlist = [(dtrain,'train'),(dval,'eval')]
         params={
             'objective': 'reg:squarederror',
-                'eval_metric': 'mae',
-                'seed':777,
-                'gpu_id':0,
-                'tree_method':'gpu_hist'
+            'eval_metric': 'mae',
+            'seed':777,
+            'gpu_id':0,
+            'tree_method':'gpu_hist',
+            'max_depth' : 6
         }
-        model = xgb.train(params,dtrain,num_boost_round=1000,verbose_eval=1000,evals=wlist)
+        model = xgb.train(params,dtrain,num_boost_round=10000,verbose_eval=10000,evals=wlist,early_stopping_rounds=200)
+        model.get_score()
         models.append(model)
     return models
 models = {}
@@ -195,33 +197,33 @@ XY.to_csv('./data/dacon/comp3/XY2.csv')
 #####################################################
 
 
-train_df = pd.DataFrame(index = train_target['id'])
-train_fe_max = train_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
-train_fe_min = train_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
-train_fe_mean = train_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
-train_fe_std = train_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
-train_fe_median = train_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
-train_fe_skew = train_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
-train_sum = train_feat.groupby(['id']).sum().add_suffix('_sum').iloc[:,1:]
+# train_df = pd.DataFrame(index = train_target['id'])
+# train_fe_max = train_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
+# train_fe_min = train_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
+# train_fe_mean = train_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
+# train_fe_std = train_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
+# train_fe_median = train_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
+# train_fe_skew = train_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
+# train_sum = train_feat.groupby(['id']).sum().add_suffix('_sum').iloc[:,1:]
 
-train_df = pd.concat([train_df, train_fe_max, train_fe_min, train_fe_mean, train_fe_std, train_fe_median, train_fe_skew,train_sum], axis=1)
+# train_df = pd.concat([train_df, train_fe_max, train_fe_min, train_fe_mean, train_fe_std, train_fe_median, train_fe_skew,train_sum], axis=1)
 
-test_df = pd.DataFrame(index=submit['id'])
-test_fe_max = test_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
-test_fe_min = test_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
-test_fe_mean = test_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
-test_fe_std = test_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
-test_fe_median = test_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
-test_fe_skew = test_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
-test_sum = test_feat.groupby(['id']).sum().add_suffix('_sum').iloc[:,1:]
+# test_df = pd.DataFrame(index=submit['id'])
+# test_fe_max = test_feat.groupby(['id']).max().add_suffix('_max').iloc[:,1:]
+# test_fe_min = test_feat.groupby(['id']).min().add_suffix('_min').iloc[:,1:]
+# test_fe_mean = test_feat.groupby(['id']).mean().add_suffix('_mean').iloc[:,1:]
+# test_fe_std = test_feat.groupby(['id']).std().add_suffix('_std').iloc[:,1:]
+# test_fe_median = test_feat.groupby(['id']).median().add_suffix('_median').iloc[:,1:]
+# test_fe_skew = test_feat.groupby(['id']).skew().add_suffix('_skew').iloc[:,1:]
+# test_sum = test_feat.groupby(['id']).sum().add_suffix('_sum').iloc[:,1:]
 
-test_df = pd.concat([test_df, test_fe_max, test_fe_min, test_fe_mean, test_fe_std, test_fe_median, test_fe_skew,test_sum], axis=1)
-
-
+# test_df = pd.concat([test_df, test_fe_max, test_fe_min, test_fe_mean, test_fe_std, test_fe_median, test_fe_skew,test_sum], axis=1)
 
 
-train_df.to_csv('./data/dacon/comp3/train_df')
-test_df.to_csv('./data/dacon/comp3/test_df')
+
+
+# train_df.to_csv('./data/dacon/comp3/train_df')
+# test_df.to_csv('./data/dacon/comp3/test_df')
 
 
 # np.save('./data/dacon/comp3/feat_pre.npy',feat)
@@ -232,16 +234,16 @@ test_df.to_csv('./data/dacon/comp3/test_df')
 
 
 ############### 데이터 불러오기 ########################
-feat = pd.read_csv('./data/dacon/comp3/train_df')
+# feat = pd.read_csv('./data/dacon/comp3/train_df')
 # target = np.load('./data/dacon/comp3/target.npy')
-test = pd.read_csv('./data/dacon/comp3/test_df')
+# test = pd.read_csv('./data/dacon/comp3/test_df')
 ###################################################
 
 
 
 ############### M,V트레인 #####################
 
-
+'''
 print(test.shape)
 
 mv = train_target.loc[:,"M":"V"]
@@ -288,17 +290,17 @@ MV.index=range(2800,3500,1)
 
 MV.index.name="id"
 MV.to_csv('./data/dacon/comp3/XY2.csv')
-
+'''
 
 ####################################################################
 
 #####################    결과값   ###########################
 
-MV = pd.read_csv('./data/dacon/comp3/MV.csv',index_col=0,header=0)
-XY = pd.read_csv('./data/dacon/comp3/XY2.csv',index_col=0,header=0)
-sub = pd.concat([XY,MV],axis=1)
-sub.to_csv("./COMP3.csv")
-print(sub.head())
+# MV = pd.read_csv('./data/dacon/comp3/MV.csv',index_col=0,header=0)
+# XY = pd.read_csv('./data/dacon/comp3/XY2.csv',index_col=0,header=0)
+# sub = pd.concat([XY,MV],axis=1)
+# sub.to_csv("./COMP3.csv")
+# print(sub.head())
 
 #######################################################
 ###########         FFT      ##################

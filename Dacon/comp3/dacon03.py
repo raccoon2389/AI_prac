@@ -63,7 +63,7 @@ def E2(y_true, y_pred):
     return np.mean(np.sum(np.square((_t - _p) / (_t + 1e-06)), axis = 1))
 
 
-'''
+
 train_feat = pd.read_csv('./data/dacon/comp3/train_features.csv',sep=',',header=0)
 train_target = pd.read_csv('./data/dacon/comp3/train_target.csv',sep=',',header=0)
 test_feat= pd.read_csv('./data/dacon/comp3/test_features.csv',sep=',',header=0)
@@ -87,9 +87,9 @@ feat = np.zeros((train_feat["id"].max()+1,train_feat.loc[train_feat.loc[:,"id"]=
 target = np.zeros((train_target["id"].max()+1,4),dtype=np.float64)
 test= np.zeros((700,375,4),dtype=np.float64)
 
-# for i in range(train_feat["id"].max()+1):
-#     feat[i] = train_feat.loc[train_feat.loc[:,"id"]==i,'S1':].values
-#     target[i] = train_target.loc[train_target.loc[:,"id"]==i,"X":].values
+for i in range(train_feat["id"].max()+1):
+    feat[i] = train_feat.loc[train_feat.loc[:,"id"]==i,'S1':].values
+    target[i] = train_target.loc[train_target.loc[:,"id"]==i,"X":].values
 
 
 for i in range(700):
@@ -102,7 +102,7 @@ print(test.shape)
 # np.save('./data/dacon/comp3/target.npy',target)
 np.save('./data/dacon/comp3/test.npy',test)
 
-'''
+
 
 
 ############### 데이터 불러오기 ########################
@@ -182,7 +182,7 @@ np.save('./data/dacon/comp3/train2.npy',train2)
 
 
 ##################### 2번째 train ###################
-
+'''
 train = np.load('./data/dacon/comp3/train2.npy')
 test = np.load('./data/dacon/comp3/test2.npy')
 
@@ -208,7 +208,7 @@ print(score)
 # df = pd.DataFrame(y,index=range(2800,3500,1),columns=["X","Y","M","V"])
 
 # df.to_csv('./comp3.csv')
-
+'''
 ####################################################################
 
 #####################  ML ###########################

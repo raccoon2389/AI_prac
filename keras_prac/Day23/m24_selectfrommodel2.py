@@ -15,7 +15,7 @@ score = model.score(x_test,y_test)
 # print(score)
 
 thresholds = np.sort(model.feature_importances_)
-
+print(thresholds)
 # print(thresholds)
 
 for thres in thresholds: 

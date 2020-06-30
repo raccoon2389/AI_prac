@@ -47,7 +47,7 @@ model.summary()
 
 model.compile(optimizer='adam',loss='categorical_crossentropy', metrics=['acc'])
 hist = model.fit(x_train,y_train,batch_size=100,epochs=100,validation_split=0.3, callbacks=[e_stop,m_check])
-
+model.predict
 
 loss_acc = model.evaluate(x_test,y_test,batch_size=100)
 

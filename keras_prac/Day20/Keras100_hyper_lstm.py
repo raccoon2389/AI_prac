@@ -42,17 +42,17 @@ def build_model(drop=0.5,optimizer = 'adam'):
     return model
 
 def create_hyper():
-    batches = [10,20,30,40,50]
+    batches = [50000]
     optimizer = ['rmsprop','adam','adadelta']
-    droptout = np.linspace(0.1,0.5,5)
+    droptout = np.linspace(0.1,0.5,5).tolist()
     return{"batch_size" : batches, "optimizer"  : optimizer, "drop": droptout}
 
 model = KerasClassifier(build_fn=build_model, verbose = 1)
-
 hyperparameters = create_hyper()
 
-search = RandomizedSearchCV(estimator=model, param_distributions=hyperparameters,n_iter=10,cv=3,n_jobs=1)
+search = RandomizedSearchCV(estimator=model, param_distributions=hyperparameters,n_iter=1,cv=3,n_jobs=1)
 search.fit(x_train,y_train)
+print(search.estimator.fit(x_test,y_test))
 pred = search.predict(x_test)
 score = accuracy_score(y_test,pred)
 

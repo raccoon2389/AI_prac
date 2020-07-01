@@ -8,3 +8,4 @@ data/*
 *.model
 *.pyc
 *.csv
+model/*

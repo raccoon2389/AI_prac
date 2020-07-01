@@ -16,9 +16,10 @@ import keras.backend as K
 from keras.callbacks import ModelCheckpoint
 from keras.models import load_model
 import pandas as pd
-from keras.wrappers.scikit_learn import KerasClassifier
+from keras.wrappers.scikit_learn import KerasRegressor
 from numpy.random import randint
 from sklearn.model_selection import RandomizedSearchCV
+import glob
 # X_data = []
 # Y_data = []
 
@@ -66,37 +67,38 @@ def my_loss_E2(y_true, y_pred):
 
 def set_model(train_target,drop=0.3,nf=64,f=3):  # 0:x,y, 1:m, 2:v
     fs = (f,1)
+    fn = (f,4)
     activation = 'elu'
     padding = 'valid'
     model = Sequential()
 
-    model.add(Conv2D(nf*32,fs, padding=padding, activation=activation,input_shape=(375,5,1)))
+    model.add(Conv2D(nf,fs, padding=padding, activation=activation,input_shape=(375,5,1)))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*16,fs, padding=padding, activation=activation))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 1)))
-    model.add(Dropout(drop))
-
-    model.add(Conv2D(nf*16,fs, padding=padding, activation=activation))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 1)))
-    model.add(Dropout(drop))
-
-    model.add(Conv2D(nf*8,fs, padding=padding, activation=activation))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 1)))
-    model.add(Dropout(drop))
-
-
-    model.add(Conv2D(nf*8,fs, padding=padding, activation=activation))
+    model.add(Conv2D(nf*2,fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
     model.add(Conv2D(nf*4,fs, padding=padding, activation=activation))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 1)))
+    model.add(Dropout(drop))
+
+    model.add(Conv2D(nf*8,fs, padding=padding, activation=activation))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 1)))
+    model.add(Dropout(drop))
+
+
+    model.add(Conv2D(nf*16,fs, padding=padding, activation=activation))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 1)))
+    model.add(Dropout(drop))
+
+    model.add(Conv2D(nf*32,fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
@@ -125,99 +127,53 @@ def set_model(train_target,drop=0.3,nf=64,f=3):  # 0:x,y, 1:m, 2:v
        
     if train_target==0:
         model.compile(loss=my_loss_E1,
-                  optimizer=optimizer,
+                  optimizer=optimizer,metrics=['acc']
                  )
     else:
         model.compile(loss=my_loss_E2,
-                  optimizer=optimizer,
+                  optimizer=optimizer,metrics=['acc']
                  )
        
     model.summary()
 
     return model
 
+
 # tr_target = 2 
 
-def train(model,X,Y,train_target):
-    if train_target==0:
-        loss = my_loss_E1
-    else:
-        loss = my_loss_E2
-    MODEL_SAVE_FOLDER_PATH = './model/'
+def train(train_target,X,Y):
+
+    MODEL_SAVE_FOLDER_PATH = f"./model/{train_target}/"
     if not os.path.exists(MODEL_SAVE_FOLDER_PATH):
         os.mkdir(MODEL_SAVE_FOLDER_PATH)
     model_path = MODEL_SAVE_FOLDER_PATH + '{epoch:02d}-{val_loss:.4f}.hdf5'
-    best_save = ModelCheckpoint('best_m.hdf5', save_best_only=True, monitor='val_loss', mode='min')
+    best_save = ModelCheckpoint(model_path, save_best_only=True, monitor='val_loss', mode='min')
 
-    modelK = KerasClassifier(build_fn=model,verbose=1)
-    param = create_hyper()
-    search = RandomizedSearchCV(estimator=modelK,param_distributions=param,n_iter=30,cv=4,n_jobs=1)
-    history = search.fit(X, Y,
+    modelK = KerasRegressor(build_fn=set_model,verbose=1)
+    param = create_hyper(train_target)
+    search = RandomizedSearchCV(estimator=modelK,param_distributions=param,n_iter=30,cv=None,n_jobs=1)
+
+    search.fit(X, Y,
                   epochs=100,
                   shuffle=True,
                   validation_split=0.2,
                   verbose = 2,
                   callbacks=[best_save])
+    print(search.best_estimator_)
+    return search.estimator
 
-    fig, loss_ax = plt.subplots()
-    acc_ax = loss_ax.twinx()
-
-    loss_ax.plot(history.history['loss'], 'y', label='train loss')
-    loss_ax.plot(history.history['val_loss'], 'r', label='val loss')
-    loss_ax.set_xlabel('epoch')
-    loss_ax.set_ylabel('loss')
-    loss_ax.legend(loc='upper left')
-    # plt.show()    
-    
-    return model
-def plot_error(type_id,pred,true):
-    print(pred.shape)
-
-    if type_id == 0:
-        _name = 'x_pos'
-    elif type_id == 1:
-        _name = 'y_pos'
-    elif type_id == 2:
-        _name = 'mass'
-    elif type_id == 3:
-        _name = 'velocity'
-    elif type_id == 4:
-        _name = "distance"
-    else:
-        _name = 'error'
-
-    x_coord = np.arange(1,pred.shape[0]+1,1)
-    if type_id < 2:
-        Err_m = (pred[:,type_id] - true[:,type_id])
-    elif type_id < 4:
-        Err_m = ((pred[:,type_id] - true[:,type_id])/true[:,type_id])*100
-    else:
-        Err_m = ((pred[:,0]-true[:,0])**2+(pred[:,1]-true[:,1])**2)**0.5
-
-
-    fig = plt.figure(figsize=(8,6))
-    # plt.rcParams["font.family"]="Times New Roman"
-    plt.rcParams["font.size"]=15
-    plt.scatter(x_coord, Err_m, marker='o')
-    plt.title("%s Prediction for Training Data" % _name, size=20)
-    plt.xlabel("Data ID", labelpad=10, size=20)
-    plt.ylabel("Prediction Error of %s," % _name, labelpad=10, size=20)
-    plt.xticks(size=15)
-    plt.yticks(size=15)
-    plt.ylim(-100., 100.)
-    plt.xlim(0, pred.shape[0]+1)
-
-    # plt.show()
-    
-    print(np.std(Err_m))
-    print(np.max(Err_m))
-    print(np.min(Err_m))
-    return Err_m
-
-#  plot_error(type_id,pred,true):
 
 def load_best_model(train_target):
-    
+    PATH = f"./model/{train_target}/"
+    f_list = glob.glob(PATH+"*")
+    f_list = f_list.split('-')
+    L = len(f_list)
+    for i in list(range(0,L,2)):
+        f_list2 = f_list(i)
+    b = np.argmin(f_list2)
+    best = f_list[b] 
+
+    model_path = f"./model/{train_target}/{best}"
     if train_target == 0:
         model = load_model('best_m.hdf5' , custom_objects={'my_loss_E1': my_loss, })
     else:
@@ -233,29 +189,24 @@ def load_best_model(train_target):
     print('정답(original):', Y_data[i])
     print('예측값(original):', pred[i])
 
-    
-    if train_target ==0:
-        plot_error(4,pred,Y_data)
-    elif train_target ==1:
-        plot_error(2,pred,Y_data)
-    elif train_target ==2:
-        plot_error(3,pred,Y_data)    
-    
     return model
 
-def create_hyper():
+def create_hyper(train_target):
     batches = list(range(10,110,10))
-    dropout = np.linspace(0.1,0.7,50).tolist()
-    nf = randint(16,256,30).tolist()
-    fs = list(range(2,11))
-    return{"batch_size" : batches, "drop" : dropout, "nf" : nf, "f" : fs}
+    dropout = np.linspace(0.1,0.5,20).tolist()
+    nf = randint(8,128,30).tolist()
+    fs = list(range(2,6))
+    return{"batch_size" : batches, "drop" : dropout, "nf" : nf, "f" : fs,"train_target" : [train_target,train_target]}
 
 
 submit = pd.read_csv('./data/dacon/comp3/sample_submission.csv')
 
+
 for train_target in range(3):
-    model = set_model(train_target)
-    train(model,X_train, Y_train,train_target)    
+    train(train_target,X_train, Y_train)    
+
+
+for train_target in range(3):
     best_model = load_best_model(train_target)
 
    

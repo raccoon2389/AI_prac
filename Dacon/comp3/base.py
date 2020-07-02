@@ -166,18 +166,20 @@ def train(train_target,X,Y):
 def load_best_model(train_target):
     PATH = f"./model/{train_target}/"
     f_list = glob.glob(PATH+"*")
-    f_list = f_list.split('-')
+    f_list2 = [i.split("-")[1] for i in f_list]
+    f_list3 = [float(i.split(".h")[0]) for i in f_list2]
     L = len(f_list)
-    for i in list(range(0,L,2)):
-        f_list2 = f_list(i)
-    b = np.argmin(f_list2)
+    b = np.argmin(f_list3)
     best = f_list[b] 
 
-    model_path = f"./model/{train_target}/{best}"
+    print(f_list3)
+    print(best)
+    
+    model_path = best
     if train_target == 0:
-        model = load_model('best_m.hdf5' , custom_objects={'my_loss_E1': my_loss, })
+        model = load_model(model_path , custom_objects={'my_loss_E1': my_loss, })
     else:
-        model = load_model('best_m.hdf5' , custom_objects={'my_loss_E2': my_loss, })
+        model = load_model(model_path , custom_objects={'my_loss_E2': my_loss, })
 
     score = model.evaluate(X_data, Y_data, verbose=0)
     print('loss:', score)
@@ -201,9 +203,9 @@ def create_hyper(train_target):
 
 submit = pd.read_csv('./data/dacon/comp3/sample_submission.csv')
 
-
-for train_target in range(3):
-    train(train_target,X_train, Y_train)    
+# 
+# for train_target in range(2,3):
+    # train(train_target,X_train, Y_train)    
 
 
 for train_target in range(3):
@@ -223,4 +225,4 @@ for train_target in range(3):
     elif train_target == 2: # v 학습
         submit.iloc[:,4] = pred_data_test[:,3]
 
-submit.to_csv('./base.csv')
+submit.to_csv('./base.csv',index=False)

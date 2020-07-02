@@ -3,6 +3,7 @@ import numpy as np
 import sklearn
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
+import lightgbm
 
 def grap_year(data):
     data = str(data)
@@ -46,8 +47,18 @@ train_features = train_num.drop(['CSTMR_CNT', 'AMT', 'CNT'], axis=1)
 train_target = np.log1p(train_num['AMT'])
 
 # 훈련
-model = RandomForestRegressor(n_jobs=-1, random_state=0)
-model.fit(train_features, train_target)
+# model = RandomForestRegressor(n_jobs=-1, random_state=0)
+# model.fit(train_features, train_target)
+
+params = {
+    'max_depth' : 7,
+    'learning_rate': 0.07,
+    'n_iter': 1000
+}
+
+dset = lightgbm.Dataset(data=train_features,label=train_target)
+
+model = lightgbm.train(params, train_set=dset,num_boost_round=1000)
 
 # 예측 템플릿 만들기
 CARD_SIDO_NMs = df_num['CARD_SIDO_NM'].unique()

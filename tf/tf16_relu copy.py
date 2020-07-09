@@ -10,11 +10,11 @@ with tf.Session() as sess:
     y_train = sess.run(tf.one_hot(y_train, 10))
     y_test = sess.run(tf.one_hot(y_test, 10))
     sess.close()
-print(y_train.shape)
+print(x_train.shape)
 print(y_train[-1])
 
-batch_size = 100
-total_batch = int(len(x_train/batch_size))
+batch_size = 500
+total_batch = int(len(x_train)/batch_size)
 keep_prob = tf.compat.v1.placeholder(tf.float32)
 
 x = tf.compat.v1.placeholder(tf.float32, shape=[None, x_train.shape[1]])
@@ -68,10 +68,10 @@ with tf.Session() as sess:
     for epoch in range(100):
         ave_cost = 0
         for i in range(total_batch):
-            batch_xs,batch_ys = x_train[i*batch_size:(i+1)*batch_size,:], y_train[i*batch_size:(i+1)*batch_size,:]
-        _, loss_val, a,h = sess.run([optimizer, loss, acc,hypo], feed_dict={
+            batch_xs,batch_ys = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]
+        _, loss_val = sess.run([optimizer, loss], feed_dict={
                                   x: batch_xs, y: batch_ys,keep_prob:0.9})
         if epoch % 10 == 0:
-            print(epoch, loss_val, a)
+            print(epoch, loss_val)
     a,l = sess.run([acc,loss],feed_dict={x:x_test,y:y_test,keep_prob:0.9})
     print("test : " , a,l)

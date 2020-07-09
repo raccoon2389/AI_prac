@@ -11,7 +11,7 @@ y = tf.placeholder(tf.float32, shape=(None, 1))
 # print(x_data.shape)
 # print(y_data)
 W = tf.Variable(tf.zeros([x_data.shape[1], 1]))
-b = tf.Variable(tf.zeros([y_data.shape[1]]))
+b = tf.Variable(tf.zeros([1]))
 
 hypo = tf.sigmoid(tf.matmul(x,W) + b)
 

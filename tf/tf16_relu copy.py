@@ -15,7 +15,7 @@ print(y_train[-1])
 
 batch_size = 500
 total_batch = int(len(x_train)/batch_size)
-keep_prob = tf.compat.v1.placeholder(tf.float32)
+rate = tf.compat.v1.placeholder(tf.float32)
 
 x = tf.compat.v1.placeholder(tf.float32, shape=[None, x_train.shape[1]])
 y = tf.compat.v1.placeholder(tf.float32, shape=[None, y_train.shape[1]])
@@ -26,28 +26,24 @@ W1 = tf.get_variable("w1",[x_train.shape[1], layer_node[0]],initializer=tf.contr
 b1 = tf.Variable(tf.zeros([layer_node[0]]))
 
 layer1 = tf.nn.relu(tf.matmul(x, W1)+b1)
-layer11 = tf.nn.dropout(layer1,keep_prob=keep_prob)
+layer11 = tf.nn.dropout(layer1,rate=rate)
 
-W2 = tf.get_variable("w2", [layer_node[0],layer_node[1]],
-                     initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("w2", [layer_node[0],layer_node[1]])
 b2 = tf.Variable(tf.zeros([layer_node[1]]))
 layer2 = tf.nn.relu(tf.matmul(layer11, W2)+b2)
-layer22 = tf.nn.dropout(layer2, keep_prob=keep_prob)
+layer22 = tf.nn.dropout(layer2, rate=rate)
 
-W3 = tf.get_variable("w3", [layer_node[1], layer_node[2]],
-                     initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("w3", [layer_node[1], layer_node[2]])
 b3 = tf.Variable(tf.zeros([layer_node[2]]))
 layer3 = tf.nn.relu(tf.matmul(layer22, W3)+b3)
-layer33 = tf.nn.dropout(layer3, keep_prob=keep_prob)
+layer33 = tf.nn.dropout(layer3, rate=rate)
 
-W4 = tf.get_variable("w4", [layer_node[2], layer_node[3]],
-                     initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("w4", [layer_node[2], layer_node[3]])
 b4 = tf.Variable(tf.zeros([layer_node[3]]))
 layer4 = tf.nn.relu(tf.matmul(layer33, W4)+b4)
-layer44 = tf.nn.dropout(layer4, keep_prob=keep_prob)
+layer44 = tf.nn.dropout(layer4, rate=rate)
 
-W5 = tf.get_variable("w5", [layer_node[3], layer_node[4]],
-                     initializer=tf.contrib.layers.xavier_initializer())
+W5 = tf.get_variable("w5", [layer_node[3], layer_node[4]])
 b5 = tf.Variable(tf.zeros([layer_node[4]]))
 hypo = tf.nn.softmax(tf.matmul(layer44, W5)+b5)
 
@@ -59,19 +55,21 @@ predicted = tf.math.argmax(hypo,1)+1
 acc = tf.reduce_mean(tf.cast(tf.equal(tf.math.argmax(hypo, 1), tf.math.argmax(y, 1)), dtype=tf.float32))
 
 optimizer = tf.compat.v1.train.AdamOptimizer(
-    learning_rate=0.005).minimize(loss)
+    learning_rate=0.00005).minimize(loss)
 
 
 
 with tf.Session() as sess:
     sess.run(tf.compat.v1.global_variables_initializer())
     for epoch in range(100):
-        ave_cost = 0
+        avg_cost = 0
         for i in range(total_batch):
             batch_xs,batch_ys = x_train[i*batch_size:(i+1)*batch_size], y_train[i*batch_size:(i+1)*batch_size]
-        _, loss_val = sess.run([optimizer, loss], feed_dict={
-                                  x: batch_xs, y: batch_ys,keep_prob:0.9})
-        if epoch % 10 == 0:
-            print(epoch, loss_val)
-    a,l = sess.run([acc,loss],feed_dict={x:x_test,y:y_test,keep_prob:0.9})
+            _, loss_val = sess.run([optimizer, loss], feed_dict={
+                                  x: batch_xs, y: batch_ys,rate:0.1})
+            avg_cost += loss_val/batch_size
+            # avg_cost += loss_val/total_batch
+        if epoch % 1 == 0:
+            print(epoch,avg_cost)
+    a,l = sess.run([acc,loss],feed_dict={x:x_test,y:y_test,rate:0.1})
     print("test : " , a,l)

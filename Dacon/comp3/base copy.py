@@ -20,6 +20,8 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from numpy.random import randint
 from sklearn.model_selection import RandomizedSearchCV
 import glob
+from keras.layers import LeakyReLU,ReLU
+from keras.activations import relu
 # X_data = []
 # Y_data = []
 
@@ -68,64 +70,63 @@ def my_loss_E2(y_true, y_pred):
 def set_model(train_target,drop=0.3,nf=64,f=3):  # 0:x,y, 1:m, 2:v
     fs = (f,1)
     fn = (f,4)
-    activation = 'elu'
+    activation = LeakyReLU
     padding = 'valid'
     model = Sequential()
 
-    model.add(Conv2D(nf*32,fs, padding=padding, activation=activation,input_shape=(375,5,1)))
+    model.add(Conv2D(nf*32, fs, padding='same',
+                     activation=activation, input_shape=(375, 5, 1)))
+    model.add(Conv2D(nf*32, fs, padding=padding,
+                     activation=activation, input_shape=(375, 5, 1)))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*16,fs, padding=padding, activation=activation))
+    model.add(Conv2D(nf*16, fs, padding='same', activation=activation))
+    model.add(Conv2D(nf*16, fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*8,fs, padding=padding, activation=activation))
+    model.add(Conv2D(nf*8, fs, padding='same', activation=activation))
+    model.add(Conv2D(nf*8, fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*8,fs, padding=padding, activation=activation))
+    model.add(Conv2D(nf*8, fs, padding='same', activation=activation))
+    model.add(Conv2D(nf*8, fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-
-    model.add(Conv2D(nf*4,fs, padding=padding, activation=activation))
+    model.add(Conv2D(nf*8, fs, padding='same', activation=activation))
+    model.add(Conv2D(nf*8, fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*4,fs, padding=padding, activation=activation))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 1)))
-    model.add(Dropout(drop))
-
+    model.add(Conv2D(nf*4, fs, padding='same', activation=activation))
     model.add(Conv2D(nf*4, fs, padding=padding, activation=activation))
     model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(drop))
 
-    model.add(Conv2D(nf*4, fs, padding=padding, activation=activation))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 1)))
-    model.add(Dropout(drop))
+
 
     model.add(Flatten())
-    model.add(Dense(512, activation ='elu'))
+    model.add(Dense(512, activation=activation))
     model.add(Dropout(drop))
 
-    model.add(Dense(256, activation='elu'))
+    model.add(Dense(256, activation=activation))
     model.add(Dropout(drop))    
-    model.add(Dense(256, activation='elu'))
+    model.add(Dense(256, activation=activation))
     model.add(Dropout(drop))
-    model.add(Dense(128, activation ='elu'))
+    model.add(Dense(128, activation=activation))
     model.add(Dropout(drop))
-    model.add(Dense(64, activation ='elu'))
+    model.add(Dense(64, activation=activation))
     model.add(Dropout(drop))
-    model.add(Dense(32, activation ='elu'))
+    model.add(Dense(32, activation=activation))
     model.add(Dropout(drop))
     model.add(Dense(4))
 
@@ -161,18 +162,17 @@ def train(train_target,X,Y):
     model_path = MODEL_SAVE_FOLDER_PATH + '{epoch:02d}-{val_loss:.4f}.hdf5'
     best_save = ModelCheckpoint(model_path, save_best_only=True, monitor='val_loss', mode='min')
 
-    modelK = KerasRegressor(build_fn=set_model,verbose=1)
-    param = create_hyper(train_target)
-    search = RandomizedSearchCV(estimator=modelK,param_distributions=param,n_iter=30,cv=None,n_jobs=1)
+    model = set_model(train_target,drop=0.3,nf=8,f=3)
 
-    search.fit(X, Y,
-                  epochs=100,
-                  shuffle=True,
-                  validation_split=0.2,
-                  verbose = 2,
-                  callbacks=[best_save])
-    print(search.best_estimator_)
-    return search.estimator
+    model.fit(X, Y,
+               epochs=70,
+               batch_size=256,
+               shuffle=True,
+               validation_split=0.3,
+               verbose=2,
+               callbacks=[best_save])
+
+    return model
 
 
 def load_best_model(train_target):
@@ -216,7 +216,7 @@ def create_hyper(train_target):
 submit = pd.read_csv('./data/dacon/comp3/sample_submission.csv')
 
 
-for train_target in range(2,3):
+for train_target in range(3):
     train(train_target,X_train, Y_train)    
 
 

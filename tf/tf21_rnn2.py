@@ -15,8 +15,9 @@ input_dim = 1
 
 
 x = tf.placeholder(tf.float32,shape=[None,sequence_length,input_dim])
-y = tf.placeholder(tf.int32, shape=[None, input_dim])
+y = tf.placeholder(tf.int32, shape=[None, sequence_length])
 
+# cell = tf.keras.layers.LSTMCell(output)
 cell = tf.nn.rnn_cell.BasicLSTMCell(output)
 hypothesis, _states = tf.nn.dynamic_rnn(cell, x, dtype=tf.float32)
 
@@ -24,7 +25,8 @@ weights = tf.ones([ 1, sequence_length])
 sequence_loss = tf.contrib.seq2seq.sequence_loss(
     logits=hypothesis, targets=y, weights=weights)
 
-cost = tf.compat.v1.reduce_mean(tf.losses.mean_squared_error(y,hypothesis))
+# cost = tf.compat.v1.reduce_mean(tf.losses.mean_squared_error(y, hypothesis))
+cost = tf.compat.v1.reduce_mean(sequence_loss)
 
 train = tf.compat.v1.train.AdamOptimizer(learning_rate=0.1).minimize(cost)
 

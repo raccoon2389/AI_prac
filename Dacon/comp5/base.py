@@ -5,6 +5,8 @@ import glob
 # from tensorflow.keras.models import Sequential
 from TaPR_pkg import etapr
 from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
+
 from tensorflow.keras.preprocessing.sequence import TimeseriesGenerator
 
 # train_list = glob.glob('./Data/dacon/comp5/train-dataset/*.csv')
@@ -40,10 +42,15 @@ scal.fit(train_data)
 train_data = scal.transform(train_data)
 test_data = scal.transform(test_data)
 
-x = train_data[1:-4]
-y = train_data[-4:-1]
-print(x)
-print(y)
-x_data = TimeseriesGenerator(x,x,length='look_back',sampling_rate=1,stride=1,batch_size=90)
+x = train_data[:,1:-4]
+y = train_data[:,-3:]
+print(x.shape,y.shape)
+print(x[0,-1])
+print(y[0,0])
+# print(x)
+# print(y)
+x_data = TimeseriesGenerator(x,x,length=10,sampling_rate=1,stride=1,batch_size=1)
 y_data = TimeseriesGenerator(
-    y, y, length='look_back', sampling_rate=1, stride=1, batch_size=90)
+    y, y, length=10, sampling_rate=1, stride=1, batch_size=1)
+
+print(len(x_data[0]))

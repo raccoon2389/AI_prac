@@ -43,12 +43,12 @@ model = autoencoder(hidden_laysey_size=32)
 # model.compile(optimizer='adam', loss='mse', metrics=['acc'])
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 
-model.fit(x_train_noise, x_train_noise, epochs=10)
+model.fit(x_train_noise, x_train, epochs=10)
 
 fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10), (ax11, ax12, ax13, ax14, ax15)
       ) = plt.subplots(3, 5, figsize=(20, 7))
 
-output = model.predict(x_test)
+output = model.predict(x_test_noise)
 
 
 random_images = random.sample(range(output.shape[0]), 5)

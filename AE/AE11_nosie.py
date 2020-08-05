@@ -9,11 +9,14 @@ from tensorflow.keras.layers import Conv2D, Dense, MaxPool2D, Flatten, Dropout, 
 from tensorflow.keras.callbacks import EarlyStopping, TensorBoard
 import random
 
+
 def autoencoder(hidden_laysey_size):
     model = Sequential()
-    model.add(Dense(units = hidden_laysey_size, input_shape=(784,),activation='relu'))
+    model.add(Dense(units=hidden_laysey_size,
+                    input_shape=(784,), activation='relu'))
     model.add(Dense(units=784, activation='sigmoid'))
     return model
+
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -28,31 +31,48 @@ x_train = x_train.reshape(
 x_test = x_test.reshape(
     x_test.shape[0], x_test.shape[1]*x_test.shape[2]).astype('float32')/255.
 
+
+
+x_train_noise = x_train + np.random.normal(0,0.5,size=x_train.shape)
+x_test_noise = x_test + np.random.normal(0,0.5,size=x_test.shape)
+x_train_noise = np.clip(x_train_noise, 0, 1)
+x_test_noise = np.clip(x_test_noise, 0, 1)
+
 model = autoencoder(hidden_laysey_size=32)
 
 # model.compile(optimizer='adam', loss='mse', metrics=['acc'])
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 
-model.fit(x_train,x_train,epochs=10)
+model.fit(x_train_noise, x_train_noise, epochs=10)
 
-fig, ((ax1,ax2,ax3,ax4,ax5),(ax6,ax7,ax8,ax9,ax10)) = plt.subplots(2,5,figsize=(20,7))
+fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10), (ax11, ax12, ax13, ax14, ax15)
+      ) = plt.subplots(3, 5, figsize=(20, 7))
 
 output = model.predict(x_test)
 
-random_images = random.sample(range(output.shape[0]),5)
 
-for i, ax in enumerate([ax1,ax2,ax3,ax4,ax5]):
-    ax.imshow(x_test[random_images[i]].reshape(28, 28), cmap='gray')
-    if i==0:
-        ax.set_ylabel("INPUT",size=40)
+random_images = random.sample(range(output.shape[0]), 5)
+
+for i, ax in enumerate([ax1, ax2, ax3, ax4, ax5]):
+    ax.imshow(x_test[random_images[i]].reshape(28,28), cmap='gray')
+    if i == 0:
+        ax.set_ylabel("INPUT", size=40)
     ax.grid(False)
     ax.set_xticks([])
     ax.set_yticks([])
 
-for i, ax in enumerate([ax6, ax7, ax8, ax9,ax10]):
+for i, ax in enumerate([ax6, ax7, ax8, ax9, ax10]):
+    ax.imshow(x_test_noise[random_images[i]].reshape(28, 28), cmap='gray')
+    if i == 0:
+        ax.set_ylabel("NOISE", size=40)
+    ax.grid(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+for i, ax in enumerate([ax11, ax12, ax13, ax14, ax15]):
     ax.imshow(output[random_images[i]].reshape(28, 28), cmap='gray')
     if i == 0:
-        ax.set_ylabel("output", size=40)
+        ax.set_ylabel("OUTPUT", size=40)
     ax.grid(False)
     ax.set_xticks([])
     ax.set_yticks([])

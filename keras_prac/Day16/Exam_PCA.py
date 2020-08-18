@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
-from keras.models import Sequential,Model
+from keras.models import Sequential,Model,load_model
 from keras.layers import LSTM,Dense,Input
 from keras.layers.merge import concatenate
 from keras.callbacks import EarlyStopping,ModelCheckpoint

@@ -28,11 +28,11 @@ warnings.filterwarnings('ignore')
 
 
 def training(subset):
-    train_df = pd.read_csv("./data/"+subset+"_train.csv",
+    train_df = pd.read_csv("./data/"+subset+"train.csv",
                            usecols=["file", "label"])
-    valid_df = pd.read_csv("./data/"+subset+"_valid.csv",
-                           usecols=["file", "label"])
-    train_valid_df = train_df.append(valid_df, ignore_index=True)
+    # valid_df = pd.read_csv("./data/"+subset+"_valid.csv",
+    #                        usecols=["file", "label"])
+    train_valid_df = train_df
     ds_tfms = get_transforms(
         do_flip=False, flip_vert=False, max_rotate=30, max_zoom=1.1, max_warp=0.3)
     # ImageDataBunch.from_folder seems to be dysfunctional
@@ -139,8 +139,7 @@ def main():
     print("fastai version:", fastai.__version__)
     print("PyTorch version:", torch.__version__)
 
-    subsets = ["EMNIST-MNIST", "EMNIST-Digits", "EMNIST-Letters",
-               "EMNIST-Balanced", "EMNIST-Bymerge", "EMNIST-Byclass"]
+    subsets = ["dacon/comp6/"]
 
     for subset in subsets:
         tick1 = time.time()

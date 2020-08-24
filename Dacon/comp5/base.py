@@ -1,3 +1,4 @@
+from typing import Sequence
 import numpy as np
 import pandas as pd
 import glob
@@ -5,29 +6,28 @@ import glob
 # from tensorflow.keras.models import Sequential
 from TaPR_pkg import etapr
 from sklearn.preprocessing import StandardScaler
-import tensorflow as tf
+from keras.model import Sequential
+from keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPool1D
 
-from tensorflow.keras.preprocessing.sequence import TimeseriesGenerator
-
-# train_list = glob.glob('./Data/dacon/comp5/train-dataset/*.csv')
-# test_list = glob.glob('./Data/dacon/comp5/test-dataset/*.csv')
-# print(train_list,test_list)
-# ['./Data/dacon/comp5/train-dataset\\train1.csv', './Data/dacon/comp5/train-dataset\\train2.csv'] 
-# ['./Data/dacon/comp5/test-dataset\\test1.csv', './Data/dacon/comp5/test-dataset\\test2.csv']
-
-
-# def dataframe_from_csv(target):
-#     return pd.read_csv(target,index_col=0).rename(columns=lambda x: x.strip())
+train_list = glob.glob('./Data/dacon/comp5/train-dataset/*.csv')
+test_list = glob.glob('./Data/dacon/comp5/test-dataset/*.csv')
+print(train_list,test_list)
+['./Data/dacon/comp5/train-dataset\\train1.csv', './Data/dacon/comp5/train-dataset\\train2.csv'] 
+['./Data/dacon/comp5/test-dataset\\test1.csv', './Data/dacon/comp5/test-dataset\\test2.csv']
 
 
-# def dataframe_from_csvs(targets):
-#     return pd.concat([dataframe_from_csv(x) for x in targets])
+def dataframe_from_csv(target):
+    return pd.read_csv(target,index_col=0).rename(columns=lambda x: x.strip())
 
-# train_data = dataframe_from_csvs(train_list)
-# test_data = dataframe_from_csvs(test_list)
 
-# train_data.to_csv('./Data/dacon/comp5/train.csv')
-# test_data.to_csv('./Data/dacon/comp5/test.csv')
+def dataframe_from_csvs(targets):
+    return pd.concat([dataframe_from_csv(x) for x in targets])
+
+train_data = dataframe_from_csvs(train_list)
+test_data = dataframe_from_csvs(test_list)
+
+train_data.to_csv('./Data/dacon/comp5/train.csv')
+test_data.to_csv('./Data/dacon/comp5/test.csv')
 
 train_data = pd.read_csv('./Data/dacon/comp5/train.csv',header=0,index_col=0)
 test_data = pd.read_csv('./Data/dacon/comp5/test.csv',header=0,index_col=0)
@@ -49,8 +49,5 @@ print(x[0,-1])
 print(y[0,0])
 # print(x)
 # print(y)
-x_data = TimeseriesGenerator(x,x,length=10,sampling_rate=1,stride=1,batch_size=1)
-y_data = TimeseriesGenerator(
-    y, y, length=10, sampling_rate=1, stride=1, batch_size=1)
-
-print(len(x_data[0]))
+model = Sequential()
+model.add(Conv1D)

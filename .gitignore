@@ -11,3 +11,4 @@ data/*
 model/*
 *.db
 *.sqlite3
+*.dcm

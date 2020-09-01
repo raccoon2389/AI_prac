@@ -12,3 +12,4 @@ model/*
 *.db
 *.sqlite3
 *.dcm
+*.npz

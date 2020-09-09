@@ -13,3 +13,7 @@ model/*
 *.sqlite3
 *.dcm
 *.npz
+*.zip
+*.png
+*.jpg
+*.tsv
